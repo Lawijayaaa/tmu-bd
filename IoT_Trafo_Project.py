@@ -1,21 +1,29 @@
 import threading
 import time
+import os
 import toolboxTMU
 import tkinter as tk
 
+progStat = True
+
 def mainloop(thread_name, interval):
+    global progStat
     while True:
-        print(3)
-        time.sleep(5)
+        while progStat:
+            progStatLbl['text'] = "Running"
+        else:
+            progStatLbl["text"] = "Stop"
 
 def Restart():
-    print("restart")
+    os.execv(sys.executable, [sys.executable] + ['/tmu-bd/IoT_Trafo_Project.py'])
 
 def Start():
-    print("Start")
+    global progStat
+    progStat = True
 
 def Stop():
-    print("Stop")
+    global progStat
+    progStat = False
 
 if __name__ == "__main__":
     screen = tk.Tk()
