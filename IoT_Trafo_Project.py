@@ -40,55 +40,55 @@ if __name__ == "__main__":
         command = Stop)
     lastTsLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     trafoStatLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     progStatLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     firstDatLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     secondDatLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     thirdDatLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     fourthDatLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     DILbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     AILbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     debugLbl = tk.Label(
             screen,
-            font = ("Helvetica",9)
+            font = ("Helvetica",12)
             )
     
     lastTsLbl.place(x = 10, y = 50)
-    trafoStatLbl.place(x = 10, y = 90)
-    progStatLbl.place(x = 10, y = 130)
-    firstDatLbl.place(x = 10, y = 170)
-    secondDatLbl.place(x = 10, y = 210)
-    thirdDatLbl.place(x = 10, y = 250)
-    fourthDatLbl.place(x = 10, y = 290)
-    DILbl.place(x = 10, y = 330)
-    AILbl.place(x = 10, y = 370)
-    debugLbl.place(x = 10, y = 410)
+    trafoStatLbl.place(x = 10, y = 100)
+    progStatLbl.place(x = 10, y = 150)
+    firstDatLbl.place(x = 10, y = 200)
+    secondDatLbl.place(x = 10, y = 250)
+    thirdDatLbl.place(x = 10, y = 300)
+    fourthDatLbl.place(x = 10, y = 350)
+    DILbl.place(x = 10, y = 400)
+    AILbl.place(x = 10, y = 450)
+    debugLbl.place(x = 10, y = 500)
     restartBtn.place(x = 915, y = 630)
     startBtn.place(x = 815, y = 630)
     stopBtn.place(x = 715, y = 630)
