@@ -1,6 +1,6 @@
 import threading
 import time
-import os
+import os, sys
 import toolboxTMU
 import tkinter as tk
 
@@ -15,7 +15,7 @@ def mainloop(thread_name, interval):
             progStatLbl["text"] = "Stop"
 
 def Restart():
-    os.execv(sys.executable, [sys.executable] + ['/tmu-bd/IoT_Trafo_Project.py'])
+    os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/IoT_Trafo_Project.py'])
 
 def Start():
     global progStat
@@ -46,15 +46,15 @@ if __name__ == "__main__":
         screen,
         text = "Stop",
         command = Stop)
+    progStatLbl = tk.Label(
+            screen,
+            font = ("Helvetica",12)
+            )
     lastTsLbl = tk.Label(
             screen,
             font = ("Helvetica",12)
             )
     trafoStatLbl = tk.Label(
-            screen,
-            font = ("Helvetica",12)
-            )
-    progStatLbl = tk.Label(
             screen,
             font = ("Helvetica",12)
             )
@@ -87,9 +87,9 @@ if __name__ == "__main__":
             font = ("Helvetica",12)
             )
     
-    lastTsLbl.place(x = 10, y = 50)
-    trafoStatLbl.place(x = 10, y = 100)
-    progStatLbl.place(x = 10, y = 150)
+    progStatLbl.place(x = 10, y = 50)
+    lastTsLbl.place(x = 10, y = 100)
+    trafoStatLbl.place(x = 10, y = 150)
     firstDatLbl.place(x = 10, y = 200)
     secondDatLbl.place(x = 10, y = 250)
     thirdDatLbl.place(x = 10, y = 300)
