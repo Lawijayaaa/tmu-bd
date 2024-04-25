@@ -1,0 +1,3 @@
+import os
+
+os.system("IoT_Trafo_Project.py")
