@@ -13,7 +13,7 @@ screen.configure(background='#17C0EB')
 
 def mainloop():
     while True:
-        print(1)
+        print(3)
         time.sleep(5)
 
 if __name__ == "__main__":
