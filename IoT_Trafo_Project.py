@@ -89,9 +89,9 @@ if __name__ == "__main__":
     DILbl.place(x = 10, y = 330)
     AILbl.place(x = 10, y = 370)
     debugLbl.place(x = 10, y = 410)
-    restartBtn.place(x = 915, y = 625)
-    startBtn.place(x = 815, y = 625)
-    stopBtn.place(x = 715, y = 625)
+    restartBtn.place(x = 915, y = 630)
+    startBtn.place(x = 815, y = 630)
+    stopBtn.place(x = 715, y = 630)
 
     thread1 = threading.Thread(target=mainloop, args=('thread1', 1))
     thread1.start()
