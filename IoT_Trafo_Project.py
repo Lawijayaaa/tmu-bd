@@ -1,7 +1,5 @@
 import threading
-import time
 import os, sys
-import toolboxTMU
 import tkinter as tk
 
 #init value
@@ -15,7 +13,7 @@ def mainloop(thread_name, interval):
             mainScreen.progStatLbl['text'] = "Running"
         else:
             mainScreen.progStatLbl["text"] = "Stop"
-
+            
 #restart program
 def Restart():
     os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/IoT_Trafo_Project.py'])
