@@ -13,14 +13,14 @@ progStat = True
 #init logger sysdata
 ts = time.strftime("%Y%m%d")
 pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\sysdata\datalogger-'
-pathStrUnix = r'/home/pi/assets/sysdata/syslog-'
-pathSysLog = pathStrWin + ts + engineName + '.log'
-logging.basicConfig(filename=pathSysLog, format='(asctime)s | %(levelname)s: %(message)s',level=logging.INFO)
+pathStrUnix = r'/home/pi/tmu-bd/assets/sysdata/syslog-'
+pathSysLog = pathStrUnix + ts + engineName + '.log'
+logging.basicConfig(filename=pathSysLog, format='[%(asctime)s] | %(levelname)s: %(message)s',level=logging.INFO)
 
 #init logger rawdata
 pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\rawdata\datalogger-'
-pathStrUnix = r'/home/pi/assets/rawdata/datalogger-'
-pathDatLog = pathStrWin + ts + engineName + '.xlsx'
+pathStrUnix = r'/home/pi/tmu-bd/assets/rawdata/datalogger-'
+pathDatLog = pathStrUnix + ts + engineName + '.xlsx'
 
 try:
     wb = openpyxl.load_workbook(pathDatLog)
