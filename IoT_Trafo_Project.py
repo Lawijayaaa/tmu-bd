@@ -15,7 +15,7 @@ progStat = True
 ts = time.strftime("%Y%m%d")
 pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\sysdata\syslog-'
 pathStrUnix = r'/home/pi/tmu-bd/assets/sysdata/syslog-'
-pathSysLog = pathStrWin + ts + engineName + '.log'
+pathSysLog = pathStrUnix + ts + engineName + '.log'
 logging.basicConfig(filename=pathSysLog, format='[%(asctime)s] | %(levelname)s: %(message)s',level=logging.INFO)
 
 #init logger rawdata
