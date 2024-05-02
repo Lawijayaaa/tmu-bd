@@ -21,7 +21,7 @@ logging.basicConfig(filename=pathSysLog, format='[%(asctime)s] | %(levelname)s: 
 #init logger rawdata
 pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\rawdata\datalogger-'
 pathStrUnix = r'/home/pi/tmu-bd/assets/rawdata/datalogger-'
-pathDatLog = pathStrWin + ts + engineName + '.xlsx'
+pathDatLog = pathStrUnix + ts + engineName + '.xlsx'
 
 #init modbus device
 client = ModbusSerialClient(method = 'rtu', port = '/dev/ttyACM0', baudrate = 19200)
