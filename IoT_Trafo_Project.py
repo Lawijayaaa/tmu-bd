@@ -5,6 +5,7 @@ import logging
 import os, sys
 from toolboxTMU import initTkinter
 from openpyxl import Workbook
+from pymodbus.client import ModbusSerialClient
 
 #init value
 engineName = " Trafo X "
@@ -18,9 +19,12 @@ pathSysLog = pathStrWin + ts + engineName + '.log'
 logging.basicConfig(filename=pathSysLog, format='[%(asctime)s] | %(levelname)s: %(message)s',level=logging.INFO)
 
 #init logger rawdata
-pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\rawdata\datalogger-'
+#pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\rawdata\datalogger-'
 pathStrUnix = r'/home/pi/tmu-bd/assets/rawdata/datalogger-'
-pathDatLog = pathStrWin + ts + engineName + '.xlsx'
+pathDatLog = pathStrUnix + ts + engineName + '.xlsx'
+
+#init modbus device
+client = ModbusSerialClient(method = 'rtu', port = 'ttyACM0', baudrate = '19200')
 
 try:
     wb = openpyxl.load_workbook(pathDatLog)
@@ -88,7 +92,7 @@ def Stop():
     progStat = False
 
 if __name__ == "__main__":
-    #import tkinter, connect push button with function
+    #import tkinter, connect buttons with function
     mainScreen = initTkinter()
     mainScreen.restartBtn["command"] = Restart
     mainScreen.startBtn["command"] = Start
