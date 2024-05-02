@@ -24,7 +24,7 @@ pathStrUnix = r'/home/pi/tmu-bd/assets/rawdata/datalogger-'
 pathDatLog = pathStrUnix + ts + engineName + '.xlsx'
 
 #init modbus device
-client = ModbusSerialClient(method = 'rtu', port = 'ttyACM0', baudrate = '19200')
+client = ModbusSerialClient(method = 'rtu', port = '/dev/ttyACM0', baudrate = '19200')
 
 try:
     wb = openpyxl.load_workbook(pathDatLog)
