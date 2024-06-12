@@ -14,14 +14,16 @@ progStat = True
 #init logger sysdata
 ts = time.strftime("%Y%m%d")
 pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\sysdata\syslog-'
-pathStrUnix = r'/home/pi/tmu-bd/assets/sysdata/syslog-'
-pathSysLog = pathStrUnix + ts + engineName + '.log'
+pathStrUnixTest = r'/home/pi/tmu-bd/assets/sysdata Test/syslog-'
+#pathStrUnixFinal = r'/home/pi/tmu-bd/assets/sysdata Test/syslog-'
+pathSysLog = pathStrUnixTest + ts + engineName + '.log'
 logging.basicConfig(filename=pathSysLog, format='[%(asctime)s] | %(levelname)s: %(message)s',level=logging.INFO)
 
 #init logger rawdata
 pathStrWin = r'C:\Users\Lutfi.LUTFI-PC\Desktop\tmu-bd\assets\rawdata\datalogger-'
-pathStrUnix = r'/home/pi/tmu-bd/assets/rawdata/datalogger-'
-pathDatLog = pathStrUnix + ts + engineName + '.xlsx'
+pathStrUnixTest = r'/home/pi/tmu-bd/assets/rawdata Test/datalogger-'
+#pathStrUnixFinal = r'/home/pi/tmu-bd/assets/rawdata/datalogger-'
+pathDatLog = pathStrUnixTest + ts + engineName + '.xlsx'
 
 #init modbus device
 client = ModbusSerialClient(method = 'rtu', port = '/dev/ttyACM0', baudrate = 19200)
@@ -70,16 +72,17 @@ def mainloop(thread_name, interval):
     while True:
         while progStat:
             mainScreen.progStatLbl['text'] = "Running"
-            time.sleep(3)
+            time.sleep(2)
         else:
             mainScreen.progStatLbl["text"] = "Stop"
+            time.sleep(2)
 
 #restart program
 def Restart():
     global wb
     logging.info("Saving Excel File before Restart")
     wb.save(pathDatLog)
-    os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/IoT_Trafo_Project.py'])
+    os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/main.py'])
 
 #continue program
 def Start():
