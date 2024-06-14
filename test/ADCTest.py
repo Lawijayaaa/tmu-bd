@@ -4,8 +4,15 @@ from time import sleep
 adc = Adafruit_ADS1x15.ADS1115(address = 0x48, busnum = 1)
 
 while True:
-    val = adc.read_adc(0, gain = 2)
-    print(val)
+    ANcurrent3 = ((adc.read_adc(3, gain = 2)) * 20.48) / 32767
+    ANcurrent2 = ((adc.read_adc(2, gain = 2)) * 20.48) / 32767
+    ANvoltage1 = ((adc.read_adc(1, gain = 2)) * 5.12) / 32767
+    ANvoltage0 = ((adc.read_adc(0, gain = 2)) * 5.12) / 32767
+    print(ANcurrent3)
+    print(ANcurrent2)
+    print(ANvoltage1)
+    print(ANvoltage0)
+    print("~~")
     sleep(1)
 
 """
