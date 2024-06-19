@@ -7,7 +7,7 @@ client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
 loop = False
 
 def testBatch():
-    getTemp = client.read_holding_registers(0, 10, slave = 1)
+    getTemp = client.read_holding_registers(4, 4, slave = 1)
     getElect = client.read_holding_registers(0, 29, slave = 2)
     writeRly = client.write_coil(4, False, slave = 3)
     print(getTemp.registers)
