@@ -1,6 +1,53 @@
 import tkinter as tk
 from threading import Timer, Lock
 
+class parameter:
+    def __init__(self, name, isWatched, highAlarm, lowAlarm, highTrip, lowTrip, status):
+        self.name = name
+        self.isWatched = isWatched
+        self.highAlarm = highAlarm
+        self.lowAlarm = lowAlarm
+        self.highTrip = highTrip
+        self.lowTrip = lowTrip
+        self.status = status
+
+def initParameter():
+        dataSet = [parameter(None, False, None, None, None, None, None)]*53
+        arrayString = ["Voltage UN", "Voltage VN", "Voltage WN", 
+                       "Voltage UV", "Voltage VW", "Voltage UW",
+                       "Current U", "Current V", "Current W", 
+                       "Total Current", "Neutral Current",
+                       "THDV U", "THDV V", "THDV W",
+                       "THDI U", "THDI V", "THDI W",
+                       "Active Power U", "Active Power V", 
+                       "Active Power W", "Total Active Power",
+                       "Rective Power U", "Rective Power V", 
+                       "Reactive Power W", "Total Reactive Power",
+                       "Apparent Power U", "Apparent Power V", 
+                       "Apparent Power W", "Total Apparent Power",
+                       "Power Factor U", "Power Factor V", "Power Factor W",
+                       "Average Power Factor", "Frequency",
+                       "Active Energy", "Reactive Energy",
+                       "Busbar Temperature U", "Busbar Temperature V", 
+                       "Busbar Temperature W", "Top Oil Temperature",
+                       "Winding Temperature U", "Winding Temperature V", 
+                       "Winding Temperature W", "Tank Pressure",
+                       "KRated U", "Derating U", 
+                       "KRated V", "Derating V", 
+                       "KRated W", "Derating W",
+                       "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"] 
+        for i in range(0, 53):
+            dataSet[i].name = arrayString[i]
+        return(dataSet)
+
+dataSet = initParameter()
+#print(len(dataSet))
+print(dataSet[2].name)
+print(dataSet[1].name)
+print(dataSet[0].name)
+for i in dataSet:
+    print(i.name)
+
 class TimerEx(object):
     """
     A reusable thread safe timer implementation
