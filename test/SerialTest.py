@@ -9,7 +9,7 @@ loop = False
 def testBatch():
     getTemp = client.read_holding_registers(0, 10, slave = 1)
     getElect = client.read_holding_registers(0, 29, slave = 2)
-    writeRly = client.write_coil(0, False, slave = 3)
+    writeRly = client.write_coil(4, False, slave = 3)
     print(getTemp.registers)
     print(getElect.registers)
     print(writeRly)
