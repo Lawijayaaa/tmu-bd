@@ -1,27 +1,14 @@
 #from pymodbus.client import ModbusSerialClient
-"""from time import sleep
-import mysql.connector"""
+from time import sleep
+import mysql.connector
 
 #client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
 
-"""db = mysql.connector.connect(
+db = mysql.connector.connect(
     host = "localhost",
     user = "client",
     passwd = "raspi",
-    database= "iot_trafo_client")"""
-
-class parameter:
-    def __init__(self, name, highAlarm, lowAlarm, highTrip, lowTrip, status):
-        self.name = name
-        self.highAlarm = highAlarm
-        self.lowAlarm = lowAlarm
-        self.highTrip = highTrip
-        self.lowTrip = lowTrip
-        self.status = status
-
-dataSet = [parameter(None, None, None, None, None, None)]*52
-
-print(dataSet)
+    database= "iot_trafo_client")
 
 """
 while True:

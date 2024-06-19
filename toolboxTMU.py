@@ -2,8 +2,9 @@ import tkinter as tk
 from threading import Timer, Lock
 
 class parameter:
-    def __init__(self, name, isWatched, highAlarm, lowAlarm, highTrip, lowTrip, status):
+    def __init__(self, name, value, isWatched, highAlarm, lowAlarm, highTrip, lowTrip, status):
         self.name = name
+        self.value = value
         self.isWatched = isWatched
         self.highAlarm = highAlarm
         self.lowAlarm = lowAlarm
@@ -11,8 +12,8 @@ class parameter:
         self.lowTrip = lowTrip
         self.status = status
 
-def initParameter():
-        dataSet = [parameter(None, False, None, None, None, None, None)]*53
+def initParameter(inputData, thresHold):
+        dataSet = [parameter(None, None, False, None, None, None, None, None)]*54
         arrayString = ["Voltage UN", "Voltage VN", "Voltage WN", 
                        "Voltage UV", "Voltage VW", "Voltage UW",
                        "Current U", "Current V", "Current W", 
@@ -31,19 +32,36 @@ def initParameter():
                        "Busbar Temperature U", "Busbar Temperature V", 
                        "Busbar Temperature W", "Top Oil Temperature",
                        "Winding Temperature U", "Winding Temperature V", 
-                       "Winding Temperature W", "Tank Pressure",
+                       "Winding Temperature W", "Oil Level", "Tank Pressure",
                        "KRated U", "Derating U", 
                        "KRated V", "Derating V", 
                        "KRated W", "Derating W",
-                       "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"] 
-        for i in range(0, 53):
+                       "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"]
+        iswatchBool =  [True, True, True, True, True, True,
+                        True, True, True, False, True, 
+                        True, True, True, True, True, True,
+                        False, False, False, False,
+                        False, False, False, False,
+                        False, False, False, False,
+                        False, False, False, True, True, False, False,
+                        True, True, True, True, True, True, True, True, True,
+                        False, False, False, False, False, False, 
+                        True, True, True]
+        highAlarmThreshold = thresHold[0]
+        highTripThreshold = thresHold[1]
+        lowAlarmThreshold = thresHold[2]
+        lowTripThreshold = thresHold[3]
+        for i in range(0, 54):
             dataSet[i] = parameter(None, False, None, None, None, None, None)
             dataSet[i].name = arrayString[i]
+            dataSet[i].value = inputData[i]
+            dataSet[i].isWatched = iswatchBool[i]
+            if dataSet[i].isWatched :
+                dataSet[i].highAlarm = highAlarmThreshold[i]
+                dataSet[i].lowAlarm = lowAlarmThreshold[i]
+                dataSet[i].highTrip = highTripThreshold[i]
+                dataSet[i].lowTrip = lowTripThreshold[i]
         return(dataSet)
-
-dataSet = initParameter()
-for d in dataSet:
-    print(d.name)
 
 class TimerEx(object):
     """
