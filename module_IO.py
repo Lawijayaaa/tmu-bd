@@ -1,4 +1,4 @@
-from reusableTimer import TimerEx
+from toolboxTMU import TimerEx
 import RPi.GPIO as GPIO
 import Adafruit_ADS1x15
 import mysql.connector
@@ -130,7 +130,6 @@ def main():
                 resetBuzz = False
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
-        print(time.datetime())
         time.sleep(0.25)
         #print("Loop time >> %s seconds" % (time.time() - start_time))
     
