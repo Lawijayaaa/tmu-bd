@@ -1,8 +1,8 @@
 from toolboxTMU import TimerEx
+from time import sleep
 import RPi.GPIO as GPIO
 import Adafruit_ADS1x15
 import mysql.connector
-import time
 import json
 
 GPIO.setmode(GPIO.BCM)
@@ -130,7 +130,7 @@ def main():
                 resetBuzz = False
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
-        time.sleep(0.25)
+        sleep(0.25)
         #print("Loop time >> %s seconds" % (time.time() - start_time))
     
 if __name__ == "__main__":
