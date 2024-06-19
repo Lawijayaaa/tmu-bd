@@ -37,16 +37,13 @@ def initParameter():
                        "KRated W", "Derating W",
                        "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"] 
         for i in range(0, 53):
+            dataSet[i] = parameter(None, False, None, None, None, None, None)
             dataSet[i].name = arrayString[i]
         return(dataSet)
 
 dataSet = initParameter()
-#print(len(dataSet))
-print(dataSet[2].name)
-print(dataSet[1].name)
-print(dataSet[0].name)
-for i in dataSet:
-    print(i.name)
+for d in dataSet:
+    print(d.name)
 
 class TimerEx(object):
     """
