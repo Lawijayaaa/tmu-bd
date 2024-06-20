@@ -19,3 +19,8 @@ while True:
     getHarmV = client.read_holding_registers(806, 90, slave = 2)
     getHarmA = client.read_holding_registers(896, 90, slave = 2)
 """
+cursor3 = db.cursor()
+sql3 = "SELECT * FROM transformer_settings"
+cursor3.execute(sql3)
+trafoSetting = cursor3.fetchall()[0]
+print(len(trafoSetting))O

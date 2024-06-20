@@ -12,7 +12,7 @@ class parameter:
         self.lowTrip = lowTrip
         self.status = status
 
-def initParameter(inputData, thresHold):
+def initParameter(inputData, settingVal, trafoData):
         dataSet = [parameter(None, None, False, None, None, None, None, None)]*54
         arrayString = ["Voltage UN", "Voltage VN", "Voltage WN", 
                        "Voltage UV", "Voltage VW", "Voltage UW",
@@ -47,10 +47,6 @@ def initParameter(inputData, thresHold):
                         True, True, True, True, True, True, True, True, True,
                         False, False, False, False, False, False, 
                         True, True, True]
-        highAlarmThreshold = thresHold[0]
-        highTripThreshold = thresHold[1]
-        lowAlarmThreshold = thresHold[2]
-        lowTripThreshold = thresHold[3]
         for i in range(0, 54):
             dataSet[i] = parameter(None, False, None, None, None, None, None)
             dataSet[i].name = arrayString[i]
@@ -61,6 +57,7 @@ def initParameter(inputData, thresHold):
                 dataSet[i].lowAlarm = lowAlarmThreshold[i]
                 dataSet[i].highTrip = highTripThreshold[i]
                 dataSet[i].lowTrip = lowTripThreshold[i]
+        
         return(dataSet)
 
 class TimerEx(object):
