@@ -1,5 +1,6 @@
 import tkinter as tk
 from threading import Timer, Lock
+import json
 
 class parameter:
     def __init__(self, name, value, isWatched, highAlarm, lowAlarm, highTrip, lowTrip, status):
@@ -11,7 +12,13 @@ class parameter:
         self.highTrip = highTrip
         self.lowTrip = lowTrip
         self.status = status
-
+        
+    def toJson(self):
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__, 
+            sort_keys=True,
+            indent=4)
 
 def initParameter(inputData, trafoSetting, trafoData):
     paramThreshold = [[None]*54, [None]*54, [None]*54, [None]*54]    
@@ -39,7 +46,7 @@ def initParameter(inputData, trafoSetting, trafoData):
                     "KRated V", "Derating V", 
                     "KRated W", "Derating W",
                     "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"]
-    iswatchBool = [True, True, True, False, False, False,
+    iswatchBool = [False, False, False, True, True, True,
                     True, True, True, False, True, 
                     True, True, True, True, True, True,
                     False, False, False, False,
@@ -51,12 +58,12 @@ def initParameter(inputData, trafoSetting, trafoData):
                     True, True, True]
         
     for i in range(0, 3):
-        paramThreshold[0][i] = trafoSetting[2] #low trip Voltage
-        paramThreshold[1][i] = trafoSetting[4] #low alarm Voltage
-        paramThreshold[2][i] = trafoSetting[6] #high alarm Voltage
-        paramThreshold[3][i] = trafoSetting[8] #high trip Voltage
-        paramThreshold[2][i+51] = trafoSetting[9] * trafoData[4] #high alarm gap Voltage
-        paramThreshold[3][i+51] = trafoSetting[10] * trafoData[4] #high trip gap Voltage
+        paramThreshold[0][i+3] = trafoSetting[2] #low trip Voltage
+        paramThreshold[1][i+3] = trafoSetting[4] #low alarm Voltage
+        paramThreshold[2][i+3] = trafoSetting[6] #high alarm Voltage
+        paramThreshold[3][i+3] = trafoSetting[8] #high trip Voltage
+        paramThreshold[2][i+51] = (trafoSetting[9] * trafoData[4])/100 #high alarm gap Voltage
+        paramThreshold[3][i+51] = (trafoSetting[10] * trafoData[4])/100 #high trip gap Voltage
         paramThreshold[2][i+6] = (trafoSetting[21] * trafoData[6])/100 #high alarm Current Profile
         paramThreshold[3][i+6] = (trafoSetting[22] * trafoData[6])/100 #high trip Current Profile
         paramThreshold[2][i+40] = trafoSetting[17] #high alarm WTI Temp
@@ -83,7 +90,7 @@ def initParameter(inputData, trafoSetting, trafoData):
     paramThreshold[0][43] = 2 #low trip Oil Level
 
     for i in range(0, 54):            
-        dataSet[i] = parameter(None, False, None, None, None, None, None)
+        dataSet[i] = parameter(None, None, False, None, None, None, None, None)
         dataSet[i].name = arrayString[i]
         dataSet[i].value = inputData[i]
         dataSet[i].isWatched = iswatchBool[i]

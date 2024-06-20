@@ -1,0 +1,1 @@
+"{\n    \"highAlarm\": 4000,\n    \"highTrip\": 6000,\n    \"isWatched\": true,\n    \"lowAlarm\": null,\n    \"lowTrip\": null,\n    \"name\": \"Gap Voltage U-W\",\n    \"status\": null,\n    \"value\": 0\n}"
