@@ -1,9 +1,7 @@
 #from pymodbus.client import ModbusSerialClient
-from time import sleep
 import mysql.connector
 import toolboxTMU
 import time
-import json
 
 #client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
 
@@ -40,15 +38,15 @@ cursorTripSetting.execute(sqlTripSetting)
 tripSetting = cursorTripSetting.fetchall()[0]
 
 inputData = [0]*54
-dataSet = [toolboxTMU.parameter(None, None, False, None, None, None, None, None, None)]*54
+dataSet = [toolboxTMU.parameter(None, None, False, None, None, None, None, None, None)]
+for i in range(0, 53):
+    dataSet.append(toolboxTMU.parameter(None, None, False, None, None, None, None, None, None))
 dataResult = toolboxTMU.initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting)
-
-print(trafoSetting)
-print(trafoData)
-print(dataResult)
 
 for data in dataResult:
     data = data.toJson()
-    print(data)
+    #print(data)
+
+print(dataResult[0].isWatched)
 
 print("Loop time >> %s seconds" % (time.time() - start_time))

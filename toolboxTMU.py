@@ -108,7 +108,6 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting):
     paramTrip[43] = tripSetting[10] #trip setting Oil Level
 
     for i in range(0, 54):            
-        dataSet[i] = parameter(None, None, False, None, None, None, None, None)
         dataSet[i].name = arrayString[i]
         dataSet[i].value = inputData[i]
         dataSet[i].isWatched = iswatchBool[i]
