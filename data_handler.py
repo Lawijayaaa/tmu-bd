@@ -13,7 +13,6 @@ db = mysql.connector.connect(
     passwd = "raspi",
     database= "iot_trafo_client")
 
-    
 """
 while True:
     getTemp = client.read_holding_registers(4, 3, slave = 1)
@@ -23,6 +22,7 @@ while True:
     getHarmV = client.read_holding_registers(806, 90, slave = 2)
     getHarmA = client.read_holding_registers(896, 90, slave = 2)
 """
+
 start_time = time.time()
 cursorTrafoSetting = db.cursor()
 sqlTrafoSetting = "SELECT * FROM transformer_settings"
@@ -34,9 +34,14 @@ sqlTrafoData = "SELECT * FROM transformer_data"
 cursorTrafoData.execute(sqlTrafoData)
 trafoData = cursorTrafoData.fetchall()[0]
 
-inputData = [0]*54
+cursorTripSetting = db.cursor()
+sqlTripSetting = "SELECT * FROM trip_settings"
+cursorTripSetting.execute(sqlTripSetting)
+tripSetting = cursorTripSetting.fetchall()[0]
 
-dataResult = toolboxTMU.initParameter(inputData, trafoSetting, trafoData)
+inputData = [0]*54
+dataSet = [toolboxTMU.parameter(None, None, False, None, None, None, None, None, None)]*54
+dataResult = toolboxTMU.initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting)
 
 print(trafoSetting)
 print(trafoData)

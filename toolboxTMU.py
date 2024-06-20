@@ -3,7 +3,7 @@ from threading import Timer, Lock
 import json
 
 class parameter:
-    def __init__(self, name, value, isWatched, highAlarm, lowAlarm, highTrip, lowTrip, status):
+    def __init__(self, name, value, isWatched, highAlarm, lowAlarm, highTrip, lowTrip, status, trafoStat):
         self.name = name
         self.value = value
         self.isWatched = isWatched
@@ -12,6 +12,7 @@ class parameter:
         self.highTrip = highTrip
         self.lowTrip = lowTrip
         self.status = status
+        self.trafoStat = trafoStat
         
     def toJson(self):
         return json.dumps(
@@ -20,9 +21,10 @@ class parameter:
             sort_keys=True,
             indent=4)
 
-def initParameter(inputData, trafoSetting, trafoData):
-    paramThreshold = [[None]*54, [None]*54, [None]*54, [None]*54]    
-    dataSet = [parameter(None, None, False, None, None, None, None, None)]*54
+
+def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting):
+    paramThreshold = [[None]*54, [None]*54, [None]*54, [None]*54]
+    paramTrip = [None]*54
     arrayString = ["Voltage UN", "Voltage VN", "Voltage WN", 
                     "Voltage UV", "Voltage VW", "Voltage UW",
                     "Current U", "Current V", "Current W", 
@@ -31,7 +33,7 @@ def initParameter(inputData, trafoSetting, trafoData):
                     "THDI U", "THDI V", "THDI W",
                     "Active Power U", "Active Power V", 
                     "Active Power W", "Total Active Power",
-                    "Rective Power U", "Rective Power V", 
+                    "Reactive Power U", "Reactive Power V", 
                     "Reactive Power W", "Total Reactive Power",
                     "Apparent Power U", "Apparent Power V", 
                     "Apparent Power W", "Total Apparent Power",
@@ -74,6 +76,15 @@ def initParameter(inputData, trafoSetting, trafoData):
         paramThreshold[3][i + 11] = trafoSetting[32] #high trip THD Voltage Trip
         paramThreshold[2][i + 14] = trafoSetting[29] #high alarm THD Current Alarm
         paramThreshold[3][i + 14] = trafoSetting[30] #high trip THD Current Trip
+
+        paramTrip[i+3] = tripSetting[1] #trip setting Voltage
+        paramTrip[i+51] = tripSetting[2] #trip setting gap Voltage
+        paramTrip[i+6] = tripSetting[7] #trip setting Current Profile
+        paramTrip[i+40] = tripSetting[11] #trip setting WTI
+        paramTrip[i+36] = tripSetting[5] #trip setting Busbar Temp
+        paramTrip[i+11] = tripSetting[12] #trip setting THD Voltage
+        paramTrip[i+14] = tripSetting[13] #trip setting THD Current
+
     paramThreshold[0][33] = trafoData[7] - ((trafoSetting[11] * trafoData[7])/100) #low trip Frequency
     paramThreshold[1][33] = trafoData[7] - ((trafoSetting[12] * trafoData[7])/100) #low alarm Frequency
     paramThreshold[2][33] = trafoData[7] + ((trafoSetting[14] * trafoData[7])/100) #high alarm Frequency
@@ -89,17 +100,80 @@ def initParameter(inputData, trafoSetting, trafoData):
     paramThreshold[1][43] = 3 #low alarm Oil Level
     paramThreshold[0][43] = 2 #low trip Oil Level
 
+    paramTrip[33] = tripSetting[3] #trip setting Frequency
+    paramTrip[39] = tripSetting[4] #trip setting Oil Temp
+    paramTrip[32] = tripSetting[6] #trip setting PF
+    paramTrip[44] = tripSetting[9] #trip setting Tank Pressure
+    paramTrip[10] = tripSetting[14] #trip setting Neutral Current
+    paramTrip[43] = tripSetting[10] #trip setting Oil Level
+
     for i in range(0, 54):            
         dataSet[i] = parameter(None, None, False, None, None, None, None, None)
         dataSet[i].name = arrayString[i]
         dataSet[i].value = inputData[i]
         dataSet[i].isWatched = iswatchBool[i]
-        if dataSet[i].isWatched :
+        if dataSet[i].isWatched:
             dataSet[i].highAlarm = paramThreshold[2][i]
             dataSet[i].lowAlarm = paramThreshold[1][i]
             dataSet[i].highTrip = paramThreshold[3][i]
             dataSet[i].lowTrip = paramThreshold[0][i]
-        
+            if dataSet[i].highAlarm and dataSet[i].lowAlarm:
+                if dataSet[i].value <= dataSet[i].lowTrip:
+                    dataSet[i].status = 1
+                    if paramTrip[i] == 0:
+                        dataSet[i].trafoStat = 1
+                    elif paramTrip[i] == 1:
+                        dataSet[i].trafoStat = 2
+                    elif paramTrip[i] == 2:
+                        dataSet[i].trafoStat = 3
+                elif dataSet[i].value > dataSet[i].lowTrip and dataSet[i].value <= dataSet[i].lowAlarm:
+                    dataSet[i].status = 2
+                    dataSet[i].trafoStat = 1
+                elif dataSet[i].value > dataSet[i].lowAlarm and dataSet[i].value < dataSet[i].highAlarm:
+                    dataSet[i].status = 3
+                    dataSet[i].trafoStat = 0
+                elif dataSet[i].value >= dataSet[i].highAlarm and dataSet[i].value < dataSet[i].highTrip:
+                    dataSet[i].status = 4
+                    dataSet[i].trafoStat = 1
+                elif dataSet[i].value >= dataSet[i].highTrip:
+                    dataSet[i].status = 5
+                    if paramTrip[i] == 0:
+                        dataSet[i].trafoStat = 1
+                    elif paramTrip[i] == 1:
+                        dataSet[i].trafoStat = 2
+                    elif paramTrip[i] == 2:
+                        dataSet[i].trafoStat = 3
+            elif dataSet[i].highAlarm:
+                if dataSet[i].value < dataSet[i].highAlarm:
+                    dataSet[i].status = 3
+                    dataSet[i].trafoStat = 0
+                elif dataSet[i].value >= dataSet[i].highAlarm and dataSet[i].value < dataSet[i].highTrip:
+                    dataSet[i].status = 4
+                    dataSet[i].trafoStat = 1
+                elif dataSet[i].value >= dataSet[i].highTrip:
+                    dataSet[i].status = 5
+                    if paramTrip[i] == 0:
+                        dataSet[i].trafoStat = 1
+                    elif paramTrip[i] == 1:
+                        dataSet[i].trafoStat = 2
+                    elif paramTrip[i] == 2:
+                        dataSet[i].trafoStat = 3
+            elif dataSet[i].lowAlarm:
+                if dataSet[i].value <= dataSet[i].lowTrip:
+                    dataSet[i].status = 1
+                    if paramTrip[i] == 0:
+                        dataSet[i].trafoStat = 1
+                    elif paramTrip[i] == 1:
+                        dataSet[i].trafoStat = 2
+                    elif paramTrip[i] == 2:
+                        dataSet[i].trafoStat = 3
+                elif dataSet[i].value > dataSet[i].lowTrip and dataSet[i].value <= dataSet[i].lowAlarm:
+                    dataSet[i].status = 2
+                    dataSet[i].trafoStat = 1
+                elif dataSet[i].value > dataSet[i].lowAlarm:
+                    dataSet[i].status = 3
+                    dataSet[i].trafoStat = 0
+
     return(dataSet)
 
 class TimerEx(object):
