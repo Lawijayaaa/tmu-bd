@@ -10,6 +10,7 @@ db = mysql.connector.connect(
     passwd = "raspi",
     database= "iot_trafo_client")
 
+    
 """
 while True:
     getTemp = client.read_holding_registers(4, 3, slave = 1)

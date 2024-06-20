@@ -12,53 +12,88 @@ class parameter:
         self.lowTrip = lowTrip
         self.status = status
 
-def initParameter(inputData, settingVal, trafoData):
-        dataSet = [parameter(None, None, False, None, None, None, None, None)]*54
-        arrayString = ["Voltage UN", "Voltage VN", "Voltage WN", 
-                       "Voltage UV", "Voltage VW", "Voltage UW",
-                       "Current U", "Current V", "Current W", 
-                       "Total Current", "Neutral Current",
-                       "THDV U", "THDV V", "THDV W",
-                       "THDI U", "THDI V", "THDI W",
-                       "Active Power U", "Active Power V", 
-                       "Active Power W", "Total Active Power",
-                       "Rective Power U", "Rective Power V", 
-                       "Reactive Power W", "Total Reactive Power",
-                       "Apparent Power U", "Apparent Power V", 
-                       "Apparent Power W", "Total Apparent Power",
-                       "Power Factor U", "Power Factor V", "Power Factor W",
-                       "Average Power Factor", "Frequency",
-                       "Active Energy", "Reactive Energy",
-                       "Busbar Temperature U", "Busbar Temperature V", 
-                       "Busbar Temperature W", "Top Oil Temperature",
-                       "Winding Temperature U", "Winding Temperature V", 
-                       "Winding Temperature W", "Oil Level", "Tank Pressure",
-                       "KRated U", "Derating U", 
-                       "KRated V", "Derating V", 
-                       "KRated W", "Derating W",
-                       "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"]
-        iswatchBool =  [True, True, True, True, True, True,
-                        True, True, True, False, True, 
-                        True, True, True, True, True, True,
-                        False, False, False, False,
-                        False, False, False, False,
-                        False, False, False, False,
-                        False, False, False, True, True, False, False,
-                        True, True, True, True, True, True, True, True, True,
-                        False, False, False, False, False, False, 
-                        True, True, True]
-        for i in range(0, 54):
-            dataSet[i] = parameter(None, False, None, None, None, None, None)
-            dataSet[i].name = arrayString[i]
-            dataSet[i].value = inputData[i]
-            dataSet[i].isWatched = iswatchBool[i]
-            if dataSet[i].isWatched :
-                dataSet[i].highAlarm = highAlarmThreshold[i]
-                dataSet[i].lowAlarm = lowAlarmThreshold[i]
-                dataSet[i].highTrip = highTripThreshold[i]
-                dataSet[i].lowTrip = lowTripThreshold[i]
+
+def initParameter(inputData, trafoSetting, trafoData):
+    paramThreshold = [[None]*54, [None]*54, [None]*54, [None]*54]    
+    dataSet = [parameter(None, None, False, None, None, None, None, None)]*54
+    arrayString = ["Voltage UN", "Voltage VN", "Voltage WN", 
+                    "Voltage UV", "Voltage VW", "Voltage UW",
+                    "Current U", "Current V", "Current W", 
+                    "Total Current", "Neutral Current",
+                    "THDV U", "THDV V", "THDV W",
+                    "THDI U", "THDI V", "THDI W",
+                    "Active Power U", "Active Power V", 
+                    "Active Power W", "Total Active Power",
+                    "Rective Power U", "Rective Power V", 
+                    "Reactive Power W", "Total Reactive Power",
+                    "Apparent Power U", "Apparent Power V", 
+                    "Apparent Power W", "Total Apparent Power",
+                    "Power Factor U", "Power Factor V", "Power Factor W",
+                    "Average Power Factor", "Frequency",
+                    "Active Energy", "Reactive Energy",
+                    "Busbar Temperature U", "Busbar Temperature V", 
+                    "Busbar Temperature W", "Top Oil Temperature",
+                    "Winding Temperature U", "Winding Temperature V", 
+                    "Winding Temperature W", "Oil Level", "Tank Pressure",
+                    "KRated U", "Derating U", 
+                    "KRated V", "Derating V", 
+                    "KRated W", "Derating W",
+                    "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"]
+    iswatchBool = [True, True, True, False, False, False,
+                    True, True, True, False, True, 
+                    True, True, True, True, True, True,
+                    False, False, False, False,
+                    False, False, False, False,
+                    False, False, False, False,
+                    False, False, False, True, True, False, False,
+                    True, True, True, True, True, True, True, True, True,
+                    False, False, False, False, False, False, 
+                    True, True, True]
         
-        return(dataSet)
+    for i in range(0, 3):
+        paramThreshold[0][i] = trafoSetting[2] #low trip Voltage
+        paramThreshold[1][i] = trafoSetting[4] #low alarm Voltage
+        paramThreshold[2][i] = trafoSetting[6] #high alarm Voltage
+        paramThreshold[3][i] = trafoSetting[8] #high trip Voltage
+        paramThreshold[2][i+51] = trafoSetting[9] * trafoData[4] #high alarm gap Voltage
+        paramThreshold[3][i+51] = trafoSetting[10] * trafoData[4] #high trip gap Voltage
+        paramThreshold[2][i+6] = (trafoSetting[21] * trafoData[6])/100 #high alarm Current Profile
+        paramThreshold[3][i+6] = (trafoSetting[22] * trafoData[6])/100 #high trip Current Profile
+        paramThreshold[2][i+40] = trafoSetting[17] #high alarm WTI Temp
+        paramThreshold[3][i+40] = trafoSetting[18] #high trip WTI Temp
+        paramThreshold[2][i+36] = trafoSetting[27] #high alarm Busbar Temp
+        paramThreshold[3][i+36] = trafoSetting[28] #high trip Busbar Temp
+        paramThreshold[2][i + 11] = trafoSetting[31] #high alarm THD Voltage Alarm
+        paramThreshold[3][i + 11] = trafoSetting[32] #high trip THD Voltage Trip
+        paramThreshold[2][i + 14] = trafoSetting[29] #high alarm THD Current Alarm
+        paramThreshold[3][i + 14] = trafoSetting[30] #high trip THD Current Trip
+    paramThreshold[0][33] = trafoData[7] - ((trafoSetting[11] * trafoData[7])/100) #low trip Frequency
+    paramThreshold[1][33] = trafoData[7] - ((trafoSetting[12] * trafoData[7])/100) #low alarm Frequency
+    paramThreshold[2][33] = trafoData[7] + ((trafoSetting[14] * trafoData[7])/100) #high alarm Frequency
+    paramThreshold[3][33] = trafoData[7] + ((trafoSetting[13] * trafoData[7])/100) #high trip Frequency
+    paramThreshold[2][39] = trafoSetting[15] #high alarm Top Oil Temp
+    paramThreshold[3][39] = trafoSetting[16] #high trip Top Oil Temp
+    paramThreshold[1][32] = trafoSetting[19] #low alarm PF
+    paramThreshold[0][32] = trafoSetting[20] #low trip PF
+    paramThreshold[2][44] = trafoSetting[25] #high alarm Pressure Tank
+    paramThreshold[3][44] = trafoSetting[26] #high trip Pressure Tank
+    paramThreshold[2][10] = trafoSetting[33] #high alarm Neutral Current
+    paramThreshold[3][10] = trafoSetting[34] #high trip Neutral Current
+    paramThreshold[1][43] = 3 #low alarm Oil Level
+    paramThreshold[0][43] = 2 #low trip Oil Level
+
+    for i in range(0, 54):            
+        dataSet[i] = parameter(None, False, None, None, None, None, None)
+        dataSet[i].name = arrayString[i]
+        dataSet[i].value = inputData[i]
+        dataSet[i].isWatched = iswatchBool[i]
+        if dataSet[i].isWatched :
+            dataSet[i].highAlarm = paramThreshold[2][i]
+            dataSet[i].lowAlarm = paramThreshold[1][i]
+            dataSet[i].highTrip = paramThreshold[3][i]
+            dataSet[i].lowTrip = paramThreshold[0][i]
+        
+    return(dataSet)
 
 class TimerEx(object):
     """
