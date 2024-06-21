@@ -43,7 +43,7 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
                     "Busbar Temperature U", "Busbar Temperature V", 
                     "Busbar Temperature W", "Top Oil Temperature",
                     "Winding Temperature U", "Winding Temperature V", 
-                    "Winding Temperature W", "Oil Level", "Tank Pressure",
+                    "Winding Temperature W",  "Tank Pressure", "Oil Level",
                     "KRated U", "Derating U", 
                     "KRated V", "Derating V", 
                     "KRated W", "Derating W",
@@ -94,12 +94,12 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     paramThreshold[3][39] = trafoSetting[16] #high trip Top Oil Temp
     paramThreshold[1][32] = trafoSetting[19] #low alarm PF
     paramThreshold[0][32] = trafoSetting[20] #low trip PF
-    paramThreshold[2][44] = trafoSetting[25] #high alarm Pressure Tank
-    paramThreshold[3][44] = trafoSetting[26] #high trip Pressure Tank
+    paramThreshold[2][43] = trafoSetting[25] #high alarm Pressure Tank
+    paramThreshold[3][43] = trafoSetting[26] #high trip Pressure Tank
     paramThreshold[2][10] = trafoSetting[33] #high alarm Neutral Current
     paramThreshold[3][10] = trafoSetting[34] #high trip Neutral Current
-    paramThreshold[1][43] = 3 #low alarm Oil Level
-    paramThreshold[0][43] = 2 #low trip Oil Level
+    paramThreshold[1][44] = 2 #low alarm Oil Level
+    paramThreshold[0][44] = 1 #low trip Oil Level
     paramThreshold[2][51] = trafoSetting[35] #high alarm H2 ppm
     paramThreshold[3][51] = trafoSetting[36] #high trip H2 ppm
     paramThreshold[2][52] = trafoSetting[37] #high alarm Water Content ppm
@@ -108,9 +108,9 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     paramTrip[33] = tripSetting[3] #trip setting Frequency
     paramTrip[39] = tripSetting[4] #trip setting Oil Temp
     paramTrip[32] = tripSetting[6] #trip setting PF
-    paramTrip[44] = tripSetting[9] #trip setting Tank Pressure
+    paramTrip[43] = tripSetting[9] #trip setting Tank Pressure
     paramTrip[10] = tripSetting[14] #trip setting Neutral Current
-    paramTrip[43] = tripSetting[10] #trip setting Oil Level
+    paramTrip[44] = tripSetting[10] #trip setting Oil Level
     paramTrip[51] = tripSetting[15] #trip setting H2 ppm
     paramTrip[52] = tripSetting[16] #trip setting Water Content ppm
 
@@ -200,7 +200,7 @@ def dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLe
         outputData[10] = (CTratio * getElect1.registers[9])/1000 #Neutral Current
         outputData[20] = (CTratio * PTratio * (signedInt32Handler(getElect1.registers[10:12]))[0])/10 #Psig
         outputData[24] = (CTratio * PTratio * (signedInt32Handler(getElect1.registers[12:14]))[0])/10 #Qsig
-        outputData[33] = (getElect1.registers[24])/1000 #Frequency 
+        outputData[33] = (getElect1.registers[24])/100 #Frequency 
         outputData[34] = (unsignedInt32Handler(getElect1.registers[25:27]))/10 #kWh
         outputData[35] = (unsignedInt32Handler(getElect1.registers[27:]))/10 #kVARh
         outputData[32] = (outputData[29] + outputData[30] + outputData[31])/3 #Average PF

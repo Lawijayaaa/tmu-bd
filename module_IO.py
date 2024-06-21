@@ -39,11 +39,9 @@ def main():
     with open("module_IO.json", "r") as jsonFile: data = json.load(jsonFile)
     resetBuzz = data["resetBuzz"]
     prevStatBuzz = data["prevStatBuzz"]
-    cursorReadStat = db.cursor()
+    cursor = db.cursor()
     sqlReadStat = "SELECT * FROM transformer_data"
-    cursorUpdateDO = db.cursor()
     sqlUpdateDO = "UPDATE do_scan SET state = %s WHERE number = %s"
-    cursorUpdateDI = db.cursor()
     sqlUpdateDI = "UPDATE di_scan SET state = %s WHERE number = %s"
     #print("Set up time >> %s seconds" % (time.time() - start_time))
     while True:
@@ -77,46 +75,46 @@ def main():
         pbStat = GPIO.input(13)
         analogIn1 = 0 if adc.read_adc(3, gain = 2) < 0 else adc.read_adc(3, gain = 2)
         analogIn2 = 0 if adc.read_adc(2, gain = 2) < 0 else adc.read_adc(2, gain = 2)
-        cursorUpdateDI.execute(sqlUpdateDI, [pbStat, 0])
-        cursorUpdateDI.execute(sqlUpdateDI, [GPIO.input(17), 1])
-        cursorUpdateDI.execute(sqlUpdateDI, [GPIO.input(22), 2])
-        cursorUpdateDI.execute(sqlUpdateDI, [GPIO.input(27), 3])
-        cursorUpdateDI.execute(sqlUpdateDI, [oilLevelAlarm, 4])
-        cursorUpdateDI.execute(sqlUpdateDI, [oilLevelTrip, 5])
-        cursorUpdateDI.execute(sqlUpdateDI, [analogIn1, 6])
-        cursorUpdateDI.execute(sqlUpdateDI, [analogIn2, 7])
-        cursorReadStat.execute(sqlReadStat)
-        trafoStat = cursorReadStat.fetchall()[0][28]
+        cursor.execute(sqlUpdateDI, [pbStat, 0])
+        cursor.execute(sqlUpdateDI, [GPIO.input(17), 1])
+        cursor.execute(sqlUpdateDI, [GPIO.input(22), 2])
+        cursor.execute(sqlUpdateDI, [GPIO.input(27), 3])
+        cursor.execute(sqlUpdateDI, [oilLevelAlarm, 4])
+        cursor.execute(sqlUpdateDI, [oilLevelTrip, 5])
+        cursor.execute(sqlUpdateDI, [analogIn1, 6])
+        cursor.execute(sqlUpdateDI, [analogIn2, 7])
+        cursor.execute(sqlReadStat)
+        trafoStat = cursor.fetchall()[0][28]
         db.commit()
         if trafoStat == 1:
-            cursorUpdateDO.execute(sqlUpdateDO, [1, 0])
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 1])
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 2])
+            cursor.execute(sqlUpdateDO, [1, 0])
+            cursor.execute(sqlUpdateDO, [0, 1])
+            cursor.execute(sqlUpdateDO, [0, 2])
         elif trafoStat == 2:
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 0])
-            cursorUpdateDO.execute(sqlUpdateDO, [1, 1])
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 2])
+            cursor.execute(sqlUpdateDO, [0, 0])
+            cursor.execute(sqlUpdateDO, [1, 1])
+            cursor.execute(sqlUpdateDO, [0, 2])
         elif trafoStat == 3:
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 0])
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 1])
-            cursorUpdateDO.execute(sqlUpdateDO, [1, 2])
+            cursor.execute(sqlUpdateDO, [0, 0])
+            cursor.execute(sqlUpdateDO, [0, 1])
+            cursor.execute(sqlUpdateDO, [1, 2])
         else:
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 0])
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 1])
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 2])
-        cursorUpdateDO.execute(sqlUpdateDO, [valveStat, 4])
+            cursor.execute(sqlUpdateDO, [0, 0])
+            cursor.execute(sqlUpdateDO, [0, 1])
+            cursor.execute(sqlUpdateDO, [0, 2])
+        cursor.execute(sqlUpdateDO, [valveStat, 4])
         if trafoStat != prevStatBuzz and trafoStat != 0:
             if resetBuzz:
                 #print("buzzer off")
-                cursorUpdateDO.execute(sqlUpdateDO, [0, 3])
+                cursor.execute(sqlUpdateDO, [0, 3])
                 prevStatBuzz = trafoStat
                 updateJson("prevStatBuzz", trafoStat)
             else:
                 #print("buzzer on")
-                cursorUpdateDO.execute(sqlUpdateDO, [1, 3])
+                cursor.execute(sqlUpdateDO, [1, 3])
         else:
             #print("buzzer off")
-            cursorUpdateDO.execute(sqlUpdateDO, [0, 3])
+            cursor.execute(sqlUpdateDO, [0, 3])
             prevStatBuzz = trafoStat
             updateJson("prevStatBuzz", trafoStat)
             resetBuzz = False
