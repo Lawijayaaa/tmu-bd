@@ -1,6 +1,7 @@
 import tkinter as tk
 from threading import Timer, Lock
 import json
+import math
 
 class parameter:
     def __init__(self, name, value, isWatched, highAlarm, lowAlarm, highTrip, lowTrip, status, trafoStat):
@@ -20,7 +21,6 @@ class parameter:
             default=lambda o: o.__dict__, 
             sort_keys=True,
             indent=4)
-
 
 def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen):
     paramThreshold = [[None]*dataLen, [None]*dataLen, [None]*dataLen, [None]*dataLen]
@@ -47,8 +47,8 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
                     "KRated U", "Derating U", 
                     "KRated V", "Derating V", 
                     "KRated W", "Derating W",
-                    "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W",
-                    "H2 ppm", "Water Content ppm"]
+                    "H2 ppm", "Water Content ppm",
+                    "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W",]
     iswatchBool = [False, False, False, True, True, True,
                     True, True, True, False, True, 
                     True, True, True, True, True, True,
@@ -65,8 +65,8 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
         paramThreshold[1][i+3] = trafoSetting[4] #low alarm Voltage
         paramThreshold[2][i+3] = trafoSetting[6] #high alarm Voltage
         paramThreshold[3][i+3] = trafoSetting[8] #high trip Voltage
-        paramThreshold[2][i+51] = (trafoSetting[9] * trafoData[4])/100 #high alarm gap Voltage
-        paramThreshold[3][i+51] = (trafoSetting[10] * trafoData[4])/100 #high trip gap Voltage
+        paramThreshold[2][i+53] = (trafoSetting[9] * trafoData[4])/(100 * math.sqrt(3)) #high alarm gap Voltage
+        paramThreshold[3][i+53] = (trafoSetting[10] * trafoData[4])/(100 * math.sqrt(3)) #high trip gap Voltage
         paramThreshold[2][i+6] = (trafoSetting[21] * trafoData[6])/100 #high alarm Current Profile
         paramThreshold[3][i+6] = (trafoSetting[22] * trafoData[6])/100 #high trip Current Profile
         paramThreshold[2][i+40] = trafoSetting[17] #high alarm WTI Temp
@@ -79,7 +79,7 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
         paramThreshold[3][i + 14] = trafoSetting[30] #high trip THD Current Trip
 
         paramTrip[i+3] = tripSetting[1] #trip setting Voltage
-        paramTrip[i+51] = tripSetting[2] #trip setting gap Voltage
+        paramTrip[i+53] = tripSetting[2] #trip setting gap Voltage
         paramTrip[i+6] = tripSetting[7] #trip setting Current Profile
         paramTrip[i+40] = tripSetting[11] #trip setting WTI
         paramTrip[i+36] = tripSetting[5] #trip setting Busbar Temp
@@ -100,10 +100,10 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     paramThreshold[3][10] = trafoSetting[34] #high trip Neutral Current
     paramThreshold[1][43] = 3 #low alarm Oil Level
     paramThreshold[0][43] = 2 #low trip Oil Level
-    paramThreshold[2][54] = trafoSetting[35] #high alarm H2 ppm
-    paramThreshold[3][54] = trafoSetting[36] #high trip H2 ppm
-    paramThreshold[2][55] = trafoSetting[37] #high alarm Water Content ppm
-    paramThreshold[3][55] = trafoSetting[38] #high trip Water Content ppm
+    paramThreshold[2][51] = trafoSetting[35] #high alarm H2 ppm
+    paramThreshold[3][51] = trafoSetting[36] #high trip H2 ppm
+    paramThreshold[2][52] = trafoSetting[37] #high alarm Water Content ppm
+    paramThreshold[3][52] = trafoSetting[38] #high trip Water Content ppm
 
     paramTrip[33] = tripSetting[3] #trip setting Frequency
     paramTrip[39] = tripSetting[4] #trip setting Oil Temp
@@ -111,8 +111,8 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     paramTrip[44] = tripSetting[9] #trip setting Tank Pressure
     paramTrip[10] = tripSetting[14] #trip setting Neutral Current
     paramTrip[43] = tripSetting[10] #trip setting Oil Level
-    paramTrip[54] = tripSetting[15] #trip setting H2 ppm
-    paramTrip[55] = tripSetting[16] #trip setting Water Content ppm
+    paramTrip[51] = tripSetting[15] #trip setting H2 ppm
+    paramTrip[52] = tripSetting[16] #trip setting Water Content ppm
 
     for i in range(0, dataLen):            
         dataSet[i].name = arrayString[i]
@@ -179,8 +179,84 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
                 elif dataSet[i].value > dataSet[i].lowAlarm:
                     dataSet[i].status = 3
                     dataSet[i].trafoStat = 0
-
     return(dataSet)
+
+def dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLen, CTratio, PTratio):
+    outputData = [0]*dataLen
+    #parse getTemp
+    try:
+        outputData[38:41] = [(0 if member > 2400 else member/10) for member in getTemp.registers] #Busbar Temp
+    except:
+        pass
+    #parse getElect1
+    try:
+        for i in range(0, 3):
+            outputData[i] = (PTratio * getElect1.registers[i])/100 #Voltage Phase Neutral
+            outputData[i + 3] = (PTratio * getElect1.registers[i+3])/100 #Voltage Phase Phase
+            outputData[i + 6] = (CTratio * getElect1.registers[i+6])/1000 #Current
+            outputData[i + 29] = (signedInt16Handler(getElect1.registers[i+21]))/1000 #PF
+            outputData[i + 17] = (CTratio * PTratio * signedInt16Handler(getElect1.registers[i+15]))/10 #P
+            outputData[i + 21] = (CTratio * PTratio * signedInt16Handler(getElect1.registers[i+18]))/10 #Q
+        outputData[10] = (CTratio * getElect1.registers[9])/1000 #Neutral Current
+        outputData[20] = ((CTratio * PTratio * signedInt32Handler(getElect1.registers[10:12]))[0])/10 #Psig
+        outputData[24] = ((CTratio * PTratio * signedInt32Handler(getElect1.registers[12:14]))[0])/10 #Qsig
+        outputData[33] = (getElect1.registers[24])/1000 #Frequency 
+        outputData[34] = (unsignedInt32Handler(getElect1.registers[25:27]))/10 #kWh
+        outputData[35] = (unsignedInt32Handler(getElect1.registers[27:]))/10 #kVARh
+        outputData[32] = (outputData[29] + outputData[30] + outputData[31])/3 #Average PF
+        outputData[9] = outputData[6] + outputData[7] + outputData[8] #Total Current
+        outputData[53] = abs(outputData[0] - outputData[1]) #Gap Voltage Un-Vn
+        outputData[54] = abs(outputData[1] - outputData[2]) #Gap Voltage Vn-Wn
+        outputData[55] = abs(outputData[0] - outputData[2]) #Gap Voltage Un-Wn
+    except:
+        pass
+    #parse getElect2
+    try:
+        for i in range(25, 28):
+            outputData[i] = CTratio * PTratio * ((getElect2.registers[i])/10) #S
+        outputData[28] = CTratio * PTratio * ((unsignedInt32Handler(getElect2.registers[3:]))/10) #Ssig
+    except:
+        pass
+    #parse getElect3
+    try:
+        for i in range(11, 14):
+            outputData[i] = (getElect3.registers[i])/10 #THD Voltage
+            outputData[i + 3] = (getElect3.registers[i+3])/10 #THD Current
+    except:
+        pass
+    #parse getH2 and getMoist
+    try:
+        outputData[51] = getH2.registers #H2 ppm
+        outputData[52] = getMoist.registers #Water Content ppm
+    except:
+        pass
+
+def signedInt16Handler(data):
+    if data > (math.pow(2, 16))/2:
+        data = data - math.pow(2, 16)
+    else:
+        data = data
+    return data
+
+def signedInt32Handler(dataset):
+    hexData = [hex(member)[2:] for member in dataset]
+    idata = [0]*int(len(dataset)/2)
+    for i in range(0, len(hexData)): 
+        while len(hexData[i]) < 4: hexData[i] = "0" + hexData[i]
+    for i in range(0, int(len(hexData)/2)):
+        tempData = int((hexData[i*2+1] + hexData[i*2]),16)
+        if tempData > (math.pow(2, 32))/2:
+            idata[i] = tempData - math.pow(2, 32)
+        else:
+            idata[i] = tempData
+    return idata
+
+def unsignedInt32Handler(dataset):
+    hexData = [hex(member)[2:] for member in dataset]
+    for i in range(0, len(hexData)): 
+        while len(hexData[i]) < 4: hexData[i] = "0" + hexData[i]
+    tempData = int((hexData[1] + hexData[0]),16)
+    return tempData
 
 class TimerEx(object):
     """
