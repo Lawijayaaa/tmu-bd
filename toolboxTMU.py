@@ -22,9 +22,9 @@ class parameter:
             indent=4)
 
 
-def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting):
-    paramThreshold = [[None]*54, [None]*54, [None]*54, [None]*54]
-    paramTrip = [None]*54
+def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen):
+    paramThreshold = [[None]*dataLen, [None]*dataLen, [None]*dataLen, [None]*dataLen]
+    paramTrip = [None]*dataLen
     arrayString = ["Voltage UN", "Voltage VN", "Voltage WN", 
                     "Voltage UV", "Voltage VW", "Voltage UW",
                     "Current U", "Current V", "Current W", 
@@ -47,7 +47,8 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting):
                     "KRated U", "Derating U", 
                     "KRated V", "Derating V", 
                     "KRated W", "Derating W",
-                    "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"]
+                    "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W",
+                    "H2 ppm", "Water Content ppm"]
     iswatchBool = [False, False, False, True, True, True,
                     True, True, True, False, True, 
                     True, True, True, True, True, True,
@@ -57,7 +58,7 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting):
                     False, False, False, True, True, False, False,
                     True, True, True, True, True, True, True, True, True,
                     False, False, False, False, False, False, 
-                    True, True, True]
+                    True, True, True, True, True]
         
     for i in range(0, 3):
         paramThreshold[0][i+3] = trafoSetting[2] #low trip Voltage
@@ -99,6 +100,10 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting):
     paramThreshold[3][10] = trafoSetting[34] #high trip Neutral Current
     paramThreshold[1][43] = 3 #low alarm Oil Level
     paramThreshold[0][43] = 2 #low trip Oil Level
+    paramThreshold[2][54] = trafoSetting[] #high alarm H2 ppm
+    paramThreshold[3][54] = trafoSetting[] #high trip H2 ppm
+    paramThreshold[2][55] = trafoSetting[] #high alarm Water Content ppm
+    paramThreshold[3][55] = trafoSetting[] #high trip Water Content ppm
 
     paramTrip[33] = tripSetting[3] #trip setting Frequency
     paramTrip[39] = tripSetting[4] #trip setting Oil Temp
@@ -106,6 +111,8 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting):
     paramTrip[44] = tripSetting[9] #trip setting Tank Pressure
     paramTrip[10] = tripSetting[14] #trip setting Neutral Current
     paramTrip[43] = tripSetting[10] #trip setting Oil Level
+    paramTrip[54] = tripSetting[] #trip setting H2 ppm
+    paramTrip[55] = tripSetting[] #trip setting Water Content ppm
 
     for i in range(0, 54):            
         dataSet[i].name = arrayString[i]

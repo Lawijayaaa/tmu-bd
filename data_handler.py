@@ -37,11 +37,13 @@ sqlTripSetting = "SELECT * FROM trip_settings"
 cursorTripSetting.execute(sqlTripSetting)
 tripSetting = cursorTripSetting.fetchall()[0]
 
-inputData = [0]*54
+dataLen = 56
+
+inputData = [0]*dataLen
 dataSet = [toolboxTMU.parameter(None, None, False, None, None, None, None, None, None)]
-for i in range(0, 53):
+for i in range(0, dataLen-1):
     dataSet.append(toolboxTMU.parameter(None, None, False, None, None, None, None, None, None))
-dataResult = toolboxTMU.initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting)
+dataResult = toolboxTMU.initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen)
 
 for data in dataResult:
     data = data.toJson()
