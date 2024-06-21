@@ -24,6 +24,28 @@ def main():
 
     while True:
         start_time = time.time()
+
+        cursor = db.cursor()
+        sql = "SELECT * FROM transformer_settings"
+        cursor.execute(sql)
+        trafoSetting = cursor.fetchall()[0]
+        sql = "SELECT * FROM transformer_data"
+        cursor.execute(sql)
+        trafoData = cursor.fetchall()[0]
+        sql = "SELECT * FROM trip_settings"
+        cursor.execute(sql)
+        tripSetting = cursor.fetchall()[0]
+        sql = "SELECT number, name, state FROM di_scan"
+        cursor.execute(sql)
+        inputIO = cursor.fetchall()[0]
+        sql = "SELECT number, name, state FROM do_scan"
+        cursor.execute(sql)
+        outputIO = cursor.fetchall()[0]
+        db.commit()
+
+        print(outputIO)
+        print(inputIO)
+
         getTemp = client.read_holding_registers(4, 3, slave = 1)
         getElect1 = client.read_holding_registers(0, 29, slave = 2)
         getElect2 = client.read_holding_registers(46, 5, slave = 2)
@@ -37,29 +59,15 @@ def main():
         
         inputData = dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLen, CTratio, PTratio)
 
-        cursorTrafoSetting = db.cursor()
-        sqlTrafoSetting = "SELECT * FROM transformer_settings"
-        cursorTrafoSetting.execute(sqlTrafoSetting)
-        trafoSetting = cursorTrafoSetting.fetchall()[0]
-
-        cursorTrafoData = db.cursor()
-        sqlTrafoData = "SELECT * FROM transformer_data"
-        cursorTrafoData.execute(sqlTrafoData)
-        trafoData = cursorTrafoData.fetchall()[0]
-
-        cursorTripSetting = db.cursor()
-        sqlTripSetting = "SELECT * FROM trip_settings"
-        cursorTripSetting.execute(sqlTripSetting)
-        tripSetting = cursorTripSetting.fetchall()[0]
-
-        db.commit()
+        
         
         dataResult = initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen)
-        #time.sleep(3.9)
+        time.sleep(3.9)
         
+        """
         for data in dataResult:
             print(vars(data))
-        
+        """
         print("Loop time >> %s seconds" % (time.time() - start_time))
         break
 

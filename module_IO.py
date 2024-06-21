@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import Adafruit_ADS1x15
 import mysql.connector
 import json
+import time
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(13, GPIO.IN)
@@ -46,7 +47,7 @@ def main():
     sqlUpdateDI = "UPDATE di_scan SET state = %s WHERE number = %s"
     #print("Set up time >> %s seconds" % (time.time() - start_time))
     while True:
-        #start_time = time.time()
+        start_time = time.time()
         oilLevelAlarm = 1 if adc.read_adc(1, gain = 2) > 25000 else 0
         oilLevelTrip = 1 if adc.read_adc(0, gain = 2) > 25000 else 0
         if (oilLevelAlarm and oilLevelTrip) or oilLevelTrip:
@@ -104,7 +105,6 @@ def main():
             cursorUpdateDO.execute(sqlUpdateDO, [0, 1])
             cursorUpdateDO.execute(sqlUpdateDO, [0, 2])
         cursorUpdateDO.execute(sqlUpdateDO, [valveStat, 4])
-        db.commit()
         if trafoStat != prevStatBuzz and trafoStat != 0:
             if resetBuzz:
                 #print("buzzer off")
@@ -131,7 +131,7 @@ def main():
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
         sleep(0.25)
-        #print("Loop time >> %s seconds" % (time.time() - start_time))
+        print("Loop time >> %s seconds" % (time.time() - start_time))
     
 if __name__ == "__main__":
     main()
