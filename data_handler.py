@@ -14,13 +14,13 @@ db = mysql.connector.connect(
 
 def main():
     dataLen = 56
-    CTratio = 1
-    PTratio = 1
+    CTratio = 100
+    PTratio = 2
 
     inputData = [0]*dataLen
-    dataSet = [parameter(None, None, False, None, None, None, None, None, None)]
+    dataSet = [parameter("Name", 0, False, None, None, None, None, 3, 0)]
     for i in range(0, dataLen-1):
-        dataSet.append(parameter(None, None, False, None, None, None, None, None, None))
+        dataSet.append(parameter("Name", 0, False, None, None, None, None, 3, 0))
 
     while True:
         start_time = time.time()
@@ -53,11 +53,15 @@ def main():
         tripSetting = cursorTripSetting.fetchall()[0]
 
         db.commit()
-
+        
         dataResult = initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen)
-        time.sleep(1)
+        #time.sleep(3.9)
+        
+        for data in dataResult:
+            print(vars(data))
+        
         print("Loop time >> %s seconds" % (time.time() - start_time))
-
+        break
 
 if __name__ == "__main__":
     main()

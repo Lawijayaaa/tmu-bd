@@ -198,8 +198,8 @@ def dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLe
             outputData[i + 17] = (CTratio * PTratio * signedInt16Handler(getElect1.registers[i+15]))/10 #P
             outputData[i + 21] = (CTratio * PTratio * signedInt16Handler(getElect1.registers[i+18]))/10 #Q
         outputData[10] = (CTratio * getElect1.registers[9])/1000 #Neutral Current
-        outputData[20] = ((CTratio * PTratio * signedInt32Handler(getElect1.registers[10:12]))[0])/10 #Psig
-        outputData[24] = ((CTratio * PTratio * signedInt32Handler(getElect1.registers[12:14]))[0])/10 #Qsig
+        outputData[20] = (CTratio * PTratio * (signedInt32Handler(getElect1.registers[10:12]))[0])/10 #Psig
+        outputData[24] = (CTratio * PTratio * (signedInt32Handler(getElect1.registers[12:14]))[0])/10 #Qsig
         outputData[33] = (getElect1.registers[24])/1000 #Frequency 
         outputData[34] = (unsignedInt32Handler(getElect1.registers[25:27]))/10 #kWh
         outputData[35] = (unsignedInt32Handler(getElect1.registers[27:]))/10 #kVARh
@@ -212,16 +212,16 @@ def dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLe
         pass
     #parse getElect2
     try:
-        for i in range(25, 28):
-            outputData[i] = CTratio * PTratio * ((getElect2.registers[i])/10) #S
-        outputData[28] = CTratio * PTratio * ((unsignedInt32Handler(getElect2.registers[3:]))/10) #Ssig
+        for i in range(0, 3):
+            outputData[i + 25] = (CTratio * PTratio * (getElect2.registers[i])/10) #S
+        outputData[28] = (CTratio * PTratio * (unsignedInt32Handler(getElect2.registers[3:]))/10) #Ssig
     except:
         pass
     #parse getElect3
     try:
-        for i in range(11, 14):
-            outputData[i] = (getElect3.registers[i])/10 #THD Voltage
-            outputData[i + 3] = (getElect3.registers[i+3])/10 #THD Current
+        for i in range(0, 3):
+            outputData[i + 11] = (getElect3.registers[i])/10 #THD Voltage
+            outputData[i + 14] = (getElect3.registers[i+3])/10 #THD Current
     except:
         pass
     #parse getH2 and getMoist
@@ -230,6 +230,8 @@ def dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLe
         outputData[52] = getMoist.registers #Water Content ppm
     except:
         pass
+    
+    return outputData
 
 def signedInt16Handler(data):
     if data > (math.pow(2, 16))/2:
