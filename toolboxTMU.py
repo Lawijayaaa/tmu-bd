@@ -100,10 +100,10 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     paramThreshold[3][10] = trafoSetting[34] #high trip Neutral Current
     paramThreshold[1][43] = 3 #low alarm Oil Level
     paramThreshold[0][43] = 2 #low trip Oil Level
-    paramThreshold[2][54] = trafoSetting[] #high alarm H2 ppm
-    paramThreshold[3][54] = trafoSetting[] #high trip H2 ppm
-    paramThreshold[2][55] = trafoSetting[] #high alarm Water Content ppm
-    paramThreshold[3][55] = trafoSetting[] #high trip Water Content ppm
+    paramThreshold[2][54] = trafoSetting[35] #high alarm H2 ppm
+    paramThreshold[3][54] = trafoSetting[36] #high trip H2 ppm
+    paramThreshold[2][55] = trafoSetting[37] #high alarm Water Content ppm
+    paramThreshold[3][55] = trafoSetting[38] #high trip Water Content ppm
 
     paramTrip[33] = tripSetting[3] #trip setting Frequency
     paramTrip[39] = tripSetting[4] #trip setting Oil Temp
@@ -111,10 +111,10 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     paramTrip[44] = tripSetting[9] #trip setting Tank Pressure
     paramTrip[10] = tripSetting[14] #trip setting Neutral Current
     paramTrip[43] = tripSetting[10] #trip setting Oil Level
-    paramTrip[54] = tripSetting[] #trip setting H2 ppm
-    paramTrip[55] = tripSetting[] #trip setting Water Content ppm
+    paramTrip[54] = tripSetting[15] #trip setting H2 ppm
+    paramTrip[55] = tripSetting[16] #trip setting Water Content ppm
 
-    for i in range(0, 54):            
+    for i in range(0, dataLen):            
         dataSet[i].name = arrayString[i]
         dataSet[i].value = inputData[i]
         dataSet[i].isWatched = iswatchBool[i]
