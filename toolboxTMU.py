@@ -230,8 +230,23 @@ def dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLe
         outputData[52] = getMoist.registers #Water Content ppm
     except:
         pass
-    
     return outputData
+
+def harmonicParser(inputArg):
+    try:
+        inputList = [inputArg.registers[0:30], inputArg.registers[30:60], inputArg.registers[60:]]
+        outputList = [[0]*15, [0]*15, [0]*15]
+        harmIndex = 0
+        for i in range(0, 3):
+            for j in range(0, len(outputList[i])):
+                if j % 2 == 1:
+                    outputList[i][harmIndex] = (inputList[i][j])/10
+                    harmIndex = harmIndex + 1
+            harmIndex = 0
+            outputList[i].insert(0, 100)
+    except:
+        outputList = [[0]*16, [0]*16, [0]*16]
+    return outputList
 
 def signedInt16Handler(data):
     if data > (math.pow(2, 16))/2:
@@ -259,6 +274,75 @@ def unsignedInt32Handler(dataset):
         while len(hexData[i]) < 4: hexData[i] = "0" + hexData[i]
     tempData = int((hexData[1] + hexData[0]),16)
     return tempData
+
+class sqlLibrary():
+    sqlTrafoSetting = "SELECT * FROM transformer_settings"
+    sqlTrafoData = "SELECT * FROM transformer_data"
+    sqlTrafoStatus = "SELECT * FROM transformer_status"
+    sqlTripStatus = "SELECT * FROM trip_status"
+    sqlTripSetting = "SELECT * FROM trip_settings"
+    sqlDIscan = "SELECT * FROM di_scan"
+    sqlDOscan = "SELECT * FROM do_scan"
+    sqlUpdateTrafoStat = "UPDATE transformer_data SET status = %s WHERE trafoId = 1"
+    sqlUpdateTransformerStatus = """UPDATE transformer_status SET 
+                    Vab = %s , Vbc = %s , Vca = %s ,
+                    Current1 = %s , Current2 = %s , Current3 = %s , Ineutral = %s ,
+                    THDVoltage1 = %s, THDVoltage2 = %s , THDVoltage3 = %s , 
+                    THDCurrent1 = %s, THDCurrent2 = %s , THDCurrent3 = %s ,                
+                    PF = %s , Freq = %s , BusTemp1 = %s , BusTemp2 = %s , BusTemp3 = %s ,
+                    OilTemp = %s , WTITemp1 = %s , WTITemp2 = %s , WTITemp3 = %s ,
+                    Pressure = %s , OilLevel = %s , H2ppm = %s , Moistureppm = %s ,
+                    Uab = %s , Ubc = %s , Uca = %s WHERE trafoId = 1"""
+    sqlUpdateTripStatus = """UPDATE trip_status SET 
+                    Vab = %s , Vbc = %s , Vca = %s ,
+                    Current1 = %s , Current2 = %s , Current3 = %s , Ineutral = %s ,
+                    THDVoltage1 = %s, THDVoltage2 = %s , THDVoltage3 = %s , 
+                    THDCurrent1 = %s, THDCurrent2 = %s , THDCurrent3 = %s ,                
+                    PF = %s , Freq = %s , BusTemp1 = %s , BusTemp2 = %s , BusTemp3 = %s ,
+                    OilTemp = %s , WTITemp1 = %s , WTITemp2 = %s , WTITemp3 = %s ,
+                    Pressure = %s , OilLevel = %s , H2ppm = %s , Moistureppm = %s ,
+                    Uab = %s , Ubc = %s , Uca = %s WHERE trafoId = 1"""
+    sqlInsertData = """INSERT INTO reading_data (timestamp,
+                    Van, Vbn, Vcn, Vab, Vbc, Vca, Ia, Ib, Ic, Iavg, Ineutral
+                    THDV1, THDV2, THDV3, THDI1, THDI2, THDI3,
+                    Pa, Pb, Pc, Psig, Qa, Qb, Qc, Qsig, Sa, Sb, Sc, Ssig,
+                    PFa, PFb, PFc, PFsig, Freq, kWh, kVARh, 
+                    BusTemp1, BusTemp2, BusTemp3, OilTemp,
+                    WTITemp1, WTITemp2, WTITemp3, Press, Level,
+                    KRateda, deRatinga, KRatedb, deRatingb, KRatedc, deRatingc,
+                    H2ppm, Moistureppm, UnbalanceUV, UnbalanceVW, UnbalanceUW) VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s,)"""
+    sqlUpdateVHarm1 = """UPDATE voltage_harmonic SET 
+                    1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
+                    13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
+                    25th = %s , 27th = %s , 29th = %s , 31th = %s WHERE Phase = 1"""
+    sqlUpdateVHarm2 = """UPDATE voltage_harmonic SET 
+                    1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
+                    13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
+                    25th = %s , 27th = %s , 29th = %s , 31th = %s WHERE Phase = 2"""
+    sqlUpdateVHarm3 = """UPDATE voltage_harmonic SET 
+                    1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
+                    13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
+                    25th = %s , 27th = %s , 29th = %s , 31th = %s WHERE Phase = 3"""
+    sqlUpdateIHarm1 = """UPDATE current_harmonic SET 
+                    1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
+                    13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
+                    25th = %s , 27th = %s , 29th = %s , 31th = %s WHERE Phase = 1"""
+    sqlUpdateIHarm2 = """UPDATE current_harmonic SET 
+                    1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
+                    13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
+                    25th = %s , 27th = %s , 29th = %s , 31th = %s WHERE Phase = 2"""
+    sqlUpdateIHarm3 = """UPDATE current_harmonic SET 
+                    1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
+                    13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
+                    25th = %s , 27th = %s , 29th = %s , 31th = %s WHERE Phase = 3"""
+
 
 class TimerEx(object):
     """
