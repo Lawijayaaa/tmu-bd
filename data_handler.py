@@ -19,8 +19,8 @@ def main():
     PTratio = 2
 
     inputData = [0]*dataLen
-    prevStat = [0]*watchedData
     currentStat = [0]*watchedData
+    currentTrip = [0]*watchedData
     dataSet = [parameter("Name", 0, False, None, None, None, None, 3, 0)]
     for i in range(0, dataLen-1):
         dataSet.append(parameter("Name", 0, False, None, None, None, None, 3, 0))
@@ -29,6 +29,7 @@ def main():
     sqlTrafoSetting = "SELECT * FROM transformer_settings"
     sqlTrafoData = "SELECT * FROM transformer_data"
     sqlTrafoStatus = "SELECT * FROM transformer_status"
+    sqlTripStatus = "SELECT * FROM trip_status"
     sqlTripSetting = "SELECT * FROM trip_settings"
     sqlDIscan = "SELECT * FROM di_scan"
     sqlDOscan = "SELECT * FROM do_scan"
@@ -42,9 +43,16 @@ def main():
                 OilTemp = %s , WTITemp1 = %s , WTITemp2 = %s , WTITemp3 = %s ,
                 Pressure = %s , OilLevel = %s , H2ppm = %s , Moistureppm = %s ,
                 Uab = %s , Ubc = %s , Uca = %s WHERE trafoId = 1"""
-    cursor.execute(sqlTrafoStatus)
-    prevStat = list(cursor.fetchall()[0][1:])
-    
+    sqlUpdateTripStatus = """UPDATE trip_status SET 
+                Vab = %s , Vbc = %s , Vca = %s ,
+                Current1 = %s , Current2 = %s , Current3 = %s , Ineutral = %s ,
+                THDVoltage1 = %s, THDVoltage2 = %s , THDVoltage3 = %s , 
+                THDCurrent1 = %s, THDCurrent2 = %s , THDCurrent3 = %s ,                
+                PF = %s , Freq = %s , BusTemp1 = %s , BusTemp2 = %s , BusTemp3 = %s ,
+                OilTemp = %s , WTITemp1 = %s , WTITemp2 = %s , WTITemp3 = %s ,
+                Pressure = %s , OilLevel = %s , H2ppm = %s , Moistureppm = %s ,
+                Uab = %s , Ubc = %s , Uca = %s WHERE trafoId = 1"""
+
     while True:
         start_time = time.time()
         cursor.execute(sqlTrafoSetting)
@@ -57,8 +65,12 @@ def main():
         inputIO = cursor.fetchall()
         cursor.execute(sqlDOscan)
         outputIO = cursor.fetchall()
-        
+        cursor.execute(sqlTrafoStatus)
+        prevStat = list(cursor.fetchall()[0][1:])
+        cursor.execute(sqlTripStatus)
+        prevTrip = list(cursor.fetchall()[0][1:])
         db.commit()
+        
         for i in range(3, 5):
             if outputIO[i][2] == 1:
                 client.write_coil(i, True, slave = 3)
@@ -98,14 +110,16 @@ def main():
             if data.isWatched:
                 maxStat = data.trafoStat if data.trafoStat > maxStat else maxStat
                 currentStat[i] = data.status
+                currentTrip[i] = data.trafoStat
                 #print(data.name)
                 i = i + 1
-        if prevStat != currentStat:
+        print(currentTrip)
+        print(prevTrip)
+        if prevStat != currentStat or prevTrip != currentTrip:
             print("lhoo")
             #update transformer Status db
-            print(prevStat)
-            print(currentStat)
             cursor.execute(sqlUpdateTransformerStatus, currentStat)
+            cursor.execute(sqlUpdateTripStatus, currentTrip)
             #update db trafoStat
             cursor.execute(sqlUpdateTrafoStat, (maxStat,))
             db.commit()    
@@ -126,15 +140,14 @@ def main():
                 client.write_coil(0, False, slave = 3)
                 client.write_coil(1, False, slave = 3)
                 client.write_coil(2, False, slave = 3)
-            prevStat = currentStat
         else:
             print("okejek")
         
         #time.sleep(3.9)
         #for data in dataResult:
         #    print(vars(data))
-        #print("Loop time >> %s seconds" % (time.time() - start_time))
-        break
+        print("Loop time >> %s seconds" % (time.time() - start_time))
+        #break
         
 if __name__ == "__main__":
     main()
