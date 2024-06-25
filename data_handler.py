@@ -1,13 +1,15 @@
 #from pymodbus.client import ModbusSerialClient
 from pymodbus.client import ModbusSerialClient
 from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser
-import mysql.connector, time, datetime
+import mysql.connector, time, datetime, math
 
 def main():
     dataLen = 56
     watchedData = 29
     CTratio = 100
     PTratio = 2
+    eddyLosesGroup = 0.02
+    designedKrated = 1
     
     client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
     db = mysql.connector.connect(
@@ -36,11 +38,14 @@ def main():
         inputIO = cursor.fetchall()
         cursor.execute(sqlLibrary.sqlDOscan)
         outputIO = cursor.fetchall()
+        cursor.execute(sqlLibrary.sqlConstantWTI, (str(trafoData[27]), ))
+        constantWTI = cursor.fetchall()[0]
         cursor.execute(sqlLibrary.sqlTrafoStatus)
         prevStat = list(cursor.fetchall()[0][1:])
         cursor.execute(sqlLibrary.sqlTripStatus)
         prevTrip = list(cursor.fetchall()[0][1:])
         db.commit()
+        print(constantWTI)
         
         for i in range(3, 5):
             if outputIO[i][2] == 1:
@@ -78,6 +83,24 @@ def main():
         inputData[39] = inputIO[6][2] #Oil Temp
         inputData[43] = inputIO[7][2] #Pressure
         inputData[44] = oilStat
+
+        kRated = [0, 0, 0]
+        deRating = [0, 0, 0]
+        kRatedlist = inputHarmonicI
+        hSquared = [0]*32
+        for i in range(0, 32):
+            hSquared[i] = math.pow(((2*(i+1))-1), 2)
+        for i in range(0, len(inputHarmonicI)):
+            for j in range(0, len(inputHarmonicI[i])):
+                kRatedlist[i][j] = math.pow((inputHarmonicI[i][j])/100, 2) * hSquared[j]
+            kRated[i] = round(sum(kRatedlist[i]))
+            deRating[i] = 100 * (math.pow((eddyLosesGroup + 1)/(kRated[i]*eddyLosesGroup + 1), 0.8) - math.pow((eddyLosesGroup + 1)/(designedKrated*eddyLosesGroup + 1), 0.8) + 1)
+            if deRating[i] > 100:
+                deRating[i] = 100
+            inputData[i*2 + 45] = kRated[i]
+            inputData[i*2 + 46] = (round(deRating[i] * 100))/100
+            
+
         dataResult = initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen) 
         sendData = [datetime.datetime.now()] + inputData
         cursor.execute(sqlLibrary.sqlInsertData, sendData)

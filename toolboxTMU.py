@@ -283,6 +283,10 @@ class sqlLibrary():
     sqlTripSetting = "SELECT * FROM trip_settings"
     sqlDIscan = "SELECT * FROM di_scan"
     sqlDOscan = "SELECT * FROM do_scan"
+    sqlConstantWTI = "SELECT WindingExponent, K21, K22, T0, Tw FROM constanta_value WHERE typeCooling = %s"
+    sqlFailure = "SELECT * FROM failure_log"
+    sqlLastFailure = "SELECT * FROM failure_log ORDER BY failure_id DESC LIMIT 1"
+    sqlResolveFailure = "UPDATE failure_log SET duration = %s WHERE failure_id = %s"
     sqlUpdateTrafoStat = "UPDATE transformer_data SET status = %s WHERE trafoId = 1"
     sqlUpdateTransformerStatus = """UPDATE transformer_status SET 
                     Vab = %s , Vbc = %s , Vca = %s ,
@@ -302,22 +306,6 @@ class sqlLibrary():
                     OilTemp = %s , WTITemp1 = %s , WTITemp2 = %s , WTITemp3 = %s ,
                     Pressure = %s , OilLevel = %s , H2ppm = %s , Moistureppm = %s ,
                     Uab = %s , Ubc = %s , Uca = %s WHERE trafoId = 1"""
-    sqlInsertData = """INSERT INTO reading_data (timestamp,
-                    Van, Vbn, Vcn, Vab, Vbc, Vca, Ia, Ib, Ic, Iavg, Ineutral,
-                    THDV1, THDV2, THDV3, THDI1, THDI2, THDI3,
-                    Pa, Pb, Pc, Psig, Qa, Qb, Qc, Qsig, Sa, Sb, Sc, Ssig,
-                    PFa, PFb, PFc, PFsig, Freq, kWh, kVARh, 
-                    BusTemp1, BusTemp2, BusTemp3, OilTemp,
-                    WTITemp1, WTITemp2, WTITemp3, Press, Level,
-                    KRateda, deRatinga, KRatedb, deRatingb, KRatedc, deRatingc,
-                    H2ppm, Moistureppm, UnbalanceUV, UnbalanceVW, UnbalanceUW) VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %s, %s)"""
     sqlUpdateVHarm1 = """UPDATE voltage_harmonic SET 
                     1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
                     13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
@@ -342,6 +330,23 @@ class sqlLibrary():
                     1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
                     13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 
                     25th = %s , 27th = %s , 29th = %s , 31th = %s WHERE Phase = 3"""
+    sqlInsertData = """INSERT INTO reading_data (timestamp,
+                    Van, Vbn, Vcn, Vab, Vbc, Vca, Ia, Ib, Ic, Iavg, Ineutral,
+                    THDV1, THDV2, THDV3, THDI1, THDI2, THDI3,
+                    Pa, Pb, Pc, Psig, Qa, Qb, Qc, Qsig, Sa, Sb, Sc, Ssig,
+                    PFa, PFb, PFc, PFsig, Freq, kWh, kVARh, 
+                    BusTemp1, BusTemp2, BusTemp3, OilTemp,
+                    WTITemp1, WTITemp2, WTITemp3, Press, Level,
+                    KRateda, deRatinga, KRatedb, deRatingb, KRatedc, deRatingc,
+                    H2ppm, Moistureppm, UnbalanceUV, UnbalanceVW, UnbalanceUW) VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %s, %s)"""
+    sqlInsertFailure = "INSERT INTO failure_log (time_start, failure_type, parameter, parameterValue) VALUES (%s, %s, %s, %s)"
 
 
 class TimerEx(object):
