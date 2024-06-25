@@ -303,7 +303,7 @@ class sqlLibrary():
                     Pressure = %s , OilLevel = %s , H2ppm = %s , Moistureppm = %s ,
                     Uab = %s , Ubc = %s , Uca = %s WHERE trafoId = 1"""
     sqlInsertData = """INSERT INTO reading_data (timestamp,
-                    Van, Vbn, Vcn, Vab, Vbc, Vca, Ia, Ib, Ic, Iavg, Ineutral
+                    Van, Vbn, Vcn, Vab, Vbc, Vca, Ia, Ib, Ic, Iavg, Ineutral,
                     THDV1, THDV2, THDV3, THDI1, THDI2, THDI3,
                     Pa, Pb, Pc, Psig, Qa, Qb, Qc, Qsig, Sa, Sb, Sc, Ssig,
                     PFa, PFb, PFc, PFsig, Freq, kWh, kVARh, 
@@ -311,13 +311,13 @@ class sqlLibrary():
                     WTITemp1, WTITemp2, WTITemp3, Press, Level,
                     KRateda, deRatinga, KRatedb, deRatingb, KRatedc, deRatingc,
                     H2ppm, Moistureppm, UnbalanceUV, UnbalanceVW, UnbalanceUW) VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, 
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %s, %s,)"""
+                    %s, %s, %s, %s, %s, %s, %s, %s)"""
     sqlUpdateVHarm1 = """UPDATE voltage_harmonic SET 
                     1st = %s , 3rd = %s , 5th = %s , 7th = %s , 9th = %s , 11th = %s , 
                     13th = %s , 15th = %s , 17th = %s , 19th = %s , 21th = %s , 23th = %s , 

@@ -1,25 +1,23 @@
 #from pymodbus.client import ModbusSerialClient
 from pymodbus.client import ModbusSerialClient
 from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser
-import mysql.connector
-import time, datetime
-
-client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
-
-db = mysql.connector.connect(
-    host = "localhost",
-    user = "client",
-    passwd = "raspi",
-    database= "iot_trafo_client")
+import mysql.connector, time, datetime
 
 def main():
     dataLen = 56
     watchedData = 29
     CTratio = 100
     PTratio = 2
+    
+    client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
+    db = mysql.connector.connect(
+        host = "localhost",
+        user = "client",
+        passwd = "raspi",
+        database= "iot_trafo_client")
     cursor = db.cursor()
+    
     inputData = [0]*dataLen
-    sendData
     currentStat = [0]*watchedData
     currentTrip = [0]*watchedData
     dataSet = [parameter("Name", 0, False, None, None, None, None, 3, 0)]
@@ -83,6 +81,8 @@ def main():
         dataResult = initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen) 
         sendData = [datetime.datetime.now()] + inputData
         cursor.execute(sqlLibrary.sqlInsertData, sendData)
+        db.commit()
+        
         maxStat = 0
         i =  0
         for data in dataResult:
@@ -92,9 +92,9 @@ def main():
                 currentTrip[i] = data.trafoStat
                 #print(data.name)
                 i = i + 1
-        print(currentTrip)
-        print(prevTrip)
+        
         if prevStat != currentStat or prevTrip != currentTrip:
+            print("lhoo")
             cursor.execute(sqlLibrary.sqlUpdateTransformerStatus, currentStat)
             cursor.execute(sqlLibrary.sqlUpdateTripStatus, currentTrip)
             cursor.execute(sqlLibrary.sqlUpdateTrafoStat, (maxStat,))
