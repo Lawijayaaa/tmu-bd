@@ -10,6 +10,8 @@ def main():
     PTratio = 2
     eddyLosesGroup = 0.02
     designedKrated = 1
+    loadCoef = 60
+    cycleTime = 2 / 60
     
     client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
     db = mysql.connector.connect(
@@ -22,6 +24,19 @@ def main():
     inputData = [0]*dataLen
     currentStat = [0]*watchedData
     currentTrip = [0]*watchedData
+    kRated = [0, 0, 0]
+    deRating = [0, 0, 0]
+    kRatedlist = inputHarmonicI
+    hSquared = [0]*32
+    timePassed = [0]*3
+    deltaHi1 = [0]*3
+    deltaHi2 = [0]*3
+    deltaH1 = [0]*3
+    deltaH2 = [0]*3
+    lastLoadDefiner = [0]*3
+    currentLoadDefiner = [0]*3
+    raisingLoadBool = [True, True, True]
+    loadFactor = [0]*3
     dataSet = [parameter("Name", 0, False, None, None, None, None, 3, 0)]
     for i in range(0, dataLen-1):
         dataSet.append(parameter("Name", 0, False, None, None, None, None, 3, 0))
@@ -45,7 +60,6 @@ def main():
         cursor.execute(sqlLibrary.sqlTripStatus)
         prevTrip = list(cursor.fetchall()[0][1:])
         db.commit()
-        print(constantWTI)
         
         for i in range(3, 5):
             if outputIO[i][2] == 1:
@@ -84,10 +98,34 @@ def main():
         inputData[43] = inputIO[7][2] #Pressure
         inputData[44] = oilStat
 
-        kRated = [0, 0, 0]
-        deRating = [0, 0, 0]
-        kRatedlist = inputHarmonicI
-        hSquared = [0]*32
+        for i in range(0, 3): loadFactor[i] = (inputData[i + 6])/trafoData[6]
+        for i in range(0, 3):
+            currentLoadDefiner[i] = inputData[i + 6]
+            if currentLoadDefiner[i] - lastLoadDefiner[i] >= loadCoef:
+                timePassed[i] = 1
+                deltaHi1[i] = deltaH1[i]
+                deltaHi2[i] = deltaH2[i]
+                raisingLoadBool[i] = True
+                lastLoadDefiner[i] = currentLoadDefiner[i]
+            elif lastLoadDefiner[i] - currentLoadDefiner[i] >= loadCoef:
+                timePassed[i] = 1
+                deltaHi1[i] = deltaH1[i]
+                deltaHi2[i] = deltaH2[i]
+                raisingLoadBool[i] = False
+                lastLoadDefiner[i] = currentLoadDefiner[i]
+            else:
+                timePassed[i] = timePassed[i] + 1
+            try:
+                if raisingLoadBool[i]:
+                    deltaH1[i] = deltaHi1[i] + (((constantWTI[i] * trafoData[25] * trafoData[21]) * (math.pow(loadFactor[i], constantWTI[0])) - deltaHi1[i]) * (1 - math.exp((-1 * cycleTime * timePassed[i])/(constantWTI[2] * constantWTI[4]))))
+                    deltaH2[i] = deltaHi2[i] + ((((constantWTI[1] - 1) * trafoData[25] * trafoData[21]) * (math.pow(loadFactor[i], constantWTI[0])) - deltaHi2[i]) * (1 - math.exp((-1 * cycleTime * timePassed[i] * constantWTI[2])/constantWTI[3])))
+                else:
+                    deltaH1[i] = constantWTI[1] * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0]) + (deltaHi1[i] - (constantWTI[1] * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0]))) * (math.exp((-1 * cycleTime * timePassed[i])/(constantWTI[2] * constantWTI[4])))
+                    deltaH2[i] = (constantWTI[i] - 1) * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0]) + (deltaHi2[i] - (constantWTI[1] - 1) * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0])) * math.exp(((-1 * cycleTime * timePassed[i] * constantWTI[4])/constantWTI[3]))
+            except:
+                pass
+            inputData[i + 42] = (round((inputData[41] + (deltaH1[i] - deltaH2[i])) * 100))/100
+
         for i in range(0, 32):
             hSquared[i] = math.pow(((2*(i+1))-1), 2)
         for i in range(0, len(inputHarmonicI)):
@@ -99,7 +137,6 @@ def main():
                 deRating[i] = 100
             inputData[i*2 + 45] = kRated[i]
             inputData[i*2 + 46] = (round(deRating[i] * 100))/100
-            
 
         dataResult = initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen) 
         sendData = [datetime.datetime.now()] + inputData
