@@ -6,11 +6,11 @@ import mysql.connector, time, datetime, math
 def main():
     dataLen = 56
     watchedData = 29
-    CTratio = 100
+    CTratio = 1200
     PTratio = 2
     eddyLosesGroup = 0.02
     designedKrated = 1
-    loadCoef = 60
+    loadCoef = 5
     cycleTime = 2 / 60
     
     client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
@@ -26,7 +26,6 @@ def main():
     currentTrip = [0]*watchedData
     kRated = [0, 0, 0]
     deRating = [0, 0, 0]
-    kRatedlist = inputHarmonicI
     hSquared = [0]*32
     timePassed = [0]*3
     deltaHi1 = [0]*3
@@ -117,15 +116,18 @@ def main():
                 timePassed[i] = timePassed[i] + 1
             try:
                 if raisingLoadBool[i]:
-                    deltaH1[i] = deltaHi1[i] + (((constantWTI[i] * trafoData[25] * trafoData[21]) * (math.pow(loadFactor[i], constantWTI[0])) - deltaHi1[i]) * (1 - math.exp((-1 * cycleTime * timePassed[i])/(constantWTI[2] * constantWTI[4]))))
+                    deltaH1[i] = deltaHi1[i] + (((constantWTI[1] * trafoData[25] * trafoData[21]) * (math.pow(loadFactor[i], constantWTI[0])) - deltaHi1[i]) * (1 - math.exp((-1 * cycleTime * timePassed[i])/(constantWTI[2] * constantWTI[4]))))
                     deltaH2[i] = deltaHi2[i] + ((((constantWTI[1] - 1) * trafoData[25] * trafoData[21]) * (math.pow(loadFactor[i], constantWTI[0])) - deltaHi2[i]) * (1 - math.exp((-1 * cycleTime * timePassed[i] * constantWTI[2])/constantWTI[3])))
+                    #print("rumus beban naik")
                 else:
                     deltaH1[i] = constantWTI[1] * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0]) + (deltaHi1[i] - (constantWTI[1] * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0]))) * (math.exp((-1 * cycleTime * timePassed[i])/(constantWTI[2] * constantWTI[4])))
-                    deltaH2[i] = (constantWTI[i] - 1) * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0]) + (deltaHi2[i] - (constantWTI[1] - 1) * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0])) * math.exp(((-1 * cycleTime * timePassed[i] * constantWTI[4])/constantWTI[3]))
+                    deltaH2[i] = (constantWTI[1] - 1) * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0]) + (deltaHi2[i] - (constantWTI[1] - 1) * trafoData[25] * trafoData[21] * math.pow(loadFactor[i], constantWTI[0])) * math.exp(((-1 * cycleTime * timePassed[i] * constantWTI[4])/constantWTI[3]))
+                    #print("rumus beban turun")
             except:
                 pass
-            inputData[i + 42] = (round((inputData[41] + (deltaH1[i] - deltaH2[i])) * 100))/100
+            inputData[i + 40] = (round((inputData[39] + (deltaH1[i] - deltaH2[i])) * 100))/100
 
+        kRatedlist = inputHarmonicI
         for i in range(0, 32):
             hSquared[i] = math.pow(((2*(i+1))-1), 2)
         for i in range(0, len(inputHarmonicI)):
