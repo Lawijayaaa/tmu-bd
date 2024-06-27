@@ -24,6 +24,8 @@ def main():
     inputData = [0]*dataLen
     currentStat = [0]*watchedData
     currentTrip = [0]*watchedData
+    activeParam = [0]*watchedData
+    activeFailure = []
     kRated = [0, 0, 0]
     deRating = [0, 0, 0]
     hSquared = [0]*32
@@ -39,7 +41,20 @@ def main():
     dataSet = [parameter("Name", 0, False, None, None, None, None, 3, 0)]
     for i in range(0, dataLen-1):
         dataSet.append(parameter("Name", 0, False, None, None, None, None, 3, 0))
-
+    messageReason = ['Extreme Low',
+                'Low', 
+                'Back Normal', 
+                'High', 
+                'Extreme High']
+    msgEvent = [""] * watchedData
+    msgReminder = [""] * watchedData
+    previousTime = excelPrevTime = datetime.datetime.now()
+    cursor.execute(sqlLibrary.sqlFailure)
+    listFailure = cursor.fetchall()
+    for i in range(0, len(listFailure)):
+        if listFailure[i][2] == None:
+            activeFailure.append(listFailure[i])
+    
     while True:
         start_time = time.time()
         cursor.execute(sqlLibrary.sqlTrafoSetting)
@@ -59,7 +74,17 @@ def main():
         cursor.execute(sqlLibrary.sqlTripStatus)
         prevTrip = list(cursor.fetchall()[0][1:])
         db.commit()
-        
+
+        if int((datetime.datetime.now() - previousTime).total_seconds()) > 3600:
+            for i in range(0, len(activeFailure)):
+                msgReminder[i] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))
+            
+        if len(activeFailure):
+            for i in range(0, len(activeFailure)):
+                activeParam[i] = activeFailure[i][4]
+        else:
+            activeParam[0] = None
+
         for i in range(3, 5):
             if outputIO[i][2] == 1:
                 client.write_coil(i, True, slave = 3)
@@ -153,10 +178,37 @@ def main():
                 currentStat[i] = data.status
                 currentTrip[i] = data.trafoStat
                 #print(data.name)
+                if data.status != prevStat[i]:
+                    if data.status != 3:
+                        if data.name in activeParam:
+                            lastTimestamp = activeFailure[activeParam.index(data.name)][1]
+                            duration = int((datetime.datetime.now() - lastTimestamp).total_seconds())
+                            errorVal = [duration, activeFailure[activeParam.index(data.name)][0]]
+                            cursor.execute(sqlLibrary.sqlResolveFailure, errorVal)
+                            activeFailure.pop(activeParam.index(data.name))
+                            activeParam.pop(activeParam.index(data.name))
+                        errorVal = [datetime.datetime.now(), messageReason[data.status - 1], data.name, str(data.value)]
+                        cursor.execute(sqlLibrary.sqlInsertFailure, errorVal)
+                        cursor.execute(sqlLibrary.sqlLastFailure)
+                        lastActive = cursor.fetchall()[0]
+                        activeFailure.append(lastActive)
+                        loadProfile = str((data.value / trafoData[6]) * 100) + " Percent , Rated Current = " + str(trafoData[6])
+                        msgEvent[i] = str(data.name + " " + messageReason[data.status - 1] + " , Value = " + 
+                                        loadProfile if i == 18 or i == 19 or i == 20 else data.value +
+                                        "\n" + "Time Occurence : " + str(datetime.datetime.now()))
+                    elif data.status == 3:
+                        lastTimestamp = activeFailure[activeParam.index(data.name)][1]
+                        duration = int((datetime.datetime.now() - lastTimestamp).total_seconds())
+                        errorVal = [duration, activeFailure[activeParam.index(data.name)][0]]
+                        cursor.execute(sqlLibrary.sqlResolveFailure, errorVal)
+                        activeFailure.pop(activeParam.index(data.name))
+                        activeParam.pop(activeParam.index(data.name))
+                        msgEvent[i] = None
                 i = i + 1
         
         if prevStat != currentStat or prevTrip != currentTrip:
             print("lhoo")
+            print(msgEvent)
             cursor.execute(sqlLibrary.sqlUpdateTransformerStatus, currentStat)
             cursor.execute(sqlLibrary.sqlUpdateTripStatus, currentTrip)
             cursor.execute(sqlLibrary.sqlUpdateTrafoStat, (maxStat,))
