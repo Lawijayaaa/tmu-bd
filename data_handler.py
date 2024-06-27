@@ -7,12 +7,28 @@ import mysql.connector, time, datetime, math, openpyxl
 engineName = " Trafo X"
 progStat = True
 
-def initWorkbook():
+def main():
+    dataLen = 56
+    watchedData = 29
+    CTratio = 1200
+    PTratio = 2
+    eddyLosesGroup = 0.02
+    designedKrated = 1
+    loadCoef = 5
+    cycleTime = 2 / 60
+    
+    client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
+    db = mysql.connector.connect(
+        host = "localhost",
+        user = "client",
+        passwd = "raspi",
+        database= "iot_trafo_client")
+    cursor = db.cursor()
+
     #init logger rawdata
     ts = time.strftime("%Y%m%d")
     pathStr = r'/home/pi/tmu-bd/assets/rawdata Test/datalogger-'
     pathDatLog = pathStr + ts + engineName + '.xlsx'
-
     try:
         wb = openpyxl.load_workbook(pathDatLog)
     except:
@@ -50,25 +66,6 @@ def initWorkbook():
             for row in rows:
                 sheetHarm.append(row)
         wb.save(pathDatLog)
-
-def main():
-    dataLen = 56
-    watchedData = 29
-    CTratio = 1200
-    PTratio = 2
-    eddyLosesGroup = 0.02
-    designedKrated = 1
-    loadCoef = 5
-    cycleTime = 2 / 60
-    
-    initWorkbook()
-    client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
-    db = mysql.connector.connect(
-        host = "localhost",
-        user = "client",
-        passwd = "raspi",
-        database= "iot_trafo_client")
-    cursor = db.cursor()
     
     inputData = [0]*dataLen
     currentStat = [0]*watchedData
@@ -98,7 +95,7 @@ def main():
                 'Extreme High']
     msgEvent = [None] * watchedData
     msgReminder = [None] * watchedData
-    previousTime = excelPrevTime = datetime.datetime.now()
+    telePrevTime = excelRecordPrevTime = excelSavePrevTime = datetime.datetime.now()
     cursor.execute(sqlLibrary.sqlFailure)
     listFailure = cursor.fetchall()
     for i in range(0, len(listFailure)):
@@ -289,7 +286,7 @@ def main():
             #print("okejek")
             pass
         
-        if int((datetime.datetime.now() - previousTime).total_seconds()) > 30:
+        if int((datetime.datetime.now() - telePrevTime).total_seconds()) > 30:
             print("sekadar mengingatkan")
             for i in range(0, len(activeFailure)):
                 if activeFailure[i]:
@@ -297,11 +294,24 @@ def main():
                     msgReminder[failureIndex] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))                    
                     print(msgReminder[failureIndex])
             previousTime = datetime.datetime.now()
-        if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 10:
+        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 10:
+            for i in range(0, 3):
+                sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
+                sendHarm = ((tuple(sendHarm)),)
+                sheetHarm = wb[sheetName[i]]
+                for row in sendHarm:
+                    sheetHarm.append(row)
+            sendLog = [datetime.datetime.now().strftime("%H:%M:%S")] + sendLog + [maxStat, 0, 0, 0, 0, 0]
+            sendLog = ((tuple(sendLog)),)
+            sheet = wb["Raw_data"]
+            for row in sendLog:
+                sheet.append(row)
             print("add excel data here")
-        if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 300:
+            excelSavePrevTime = datetime.datetime.now()
+        if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 300:
             print("save excel data here")
-        
+            excelSavePrevTime = datetime.datetime.now()
+            wb.save(pathDatLog)
         cycleTime = time.time() - start_time
         print("Loop time >> %s seconds" % cycleTime)
         #break
