@@ -26,6 +26,7 @@ def main():
     currentTrip = [0]*watchedData
     dataName = ['']*watchedData
     activeParam = [None]*watchedData
+    activeFailure = [None]*watchedData
     kRated = [0, 0, 0]
     deRating = [0, 0, 0]
     hSquared = [0]*32
@@ -54,7 +55,7 @@ def main():
     activeFailure = []
     for i in range(0, len(listFailure)):
         if listFailure[i][2] == None:
-            activeFailure.append(listFailure[i])
+            activeFailure[i] = listFailure[i]
     print(activeFailure)
     
     while True:
@@ -82,7 +83,8 @@ def main():
             print(len(activeFailure))
             print(len(activeParam))
             for i in range(0, len(activeFailure)):
-                activeParam[i] = activeFailure[i][4]
+                if len(activeFailure[i]) > 1:
+                    activeParam[i] = activeFailure[i][4]
 
         for i in range(3, 5):
             if outputIO[i][2] == 1:
@@ -190,13 +192,13 @@ def main():
                             duration = int((datetime.datetime.now() - lastTimestamp).total_seconds())
                             errorVal = [duration, activeFailure[activeParam.index(data.name)][0]]
                             cursor.execute(sqlLibrary.sqlResolveFailure, errorVal)
-                            activeFailure.pop(activeParam.index(data.name))
+                            activeFailure[activeParam.index(data.name)] = None
                             activeParam[activeParam.index(data.name)] = None
                         errorVal = [datetime.datetime.now(), messageReason[data.status - 1], data.name, str(data.value)]
                         cursor.execute(sqlLibrary.sqlInsertFailure, errorVal)
                         cursor.execute(sqlLibrary.sqlLastFailure)
                         lastActive = cursor.fetchall()[0]
-                        activeFailure.append(lastActive)
+                        activeFailure[activeFailure.index(None)] = lastActive
                         loadProfile = str((data.value / trafoData[6]) * 100) + " Percent , Rated Current = " + str(trafoData[6])
                         msgEvent[i] = str(data.name + " " + messageReason[data.status - 1] + " , Value = " + (loadProfile if i == 3 or i == 4 or i == 5 else str(data.value)) + "\n" + "Time Occurence : " + str(datetime.datetime.now()))
                     elif data.status == 3:
@@ -208,7 +210,7 @@ def main():
                         duration = int((datetime.datetime.now() - lastTimestamp).total_seconds())
                         errorVal = [duration, activeFailure[activeParam.index(data.name)][0]]
                         cursor.execute(sqlLibrary.sqlResolveFailure, errorVal)
-                        activeFailure.pop(activeParam.index(data.name))
+                        activeFailure[activeParam.index(data.name)] = None
                         activeParam[activeParam.index(data.name)] = None
                         msgEvent[i] = None
                 i = i + 1
