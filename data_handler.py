@@ -29,6 +29,7 @@ def main():
     ts = time.strftime("%Y%m%d")
     pathStr = r'/home/pi/tmu-bd/assets/rawdata Test/datalogger-'
     pathDatLog = pathStr + ts + engineName + '.xlsx'
+    sheetName = ["Harmonic_phR", "Harmonic_phS", "Harmonic_phT"]
     try:
         wb = openpyxl.load_workbook(pathDatLog)
     except:
@@ -54,7 +55,6 @@ def main():
                     'trafoStatus', 'DIstat', 'DOstat', 'Alarm', 'Trip1', 'Trip2'),)
         for row in name:
             sheet.append(row)
-        sheetName = ["Harmonic_phR", "Harmonic_phS", "Harmonic_phT"]
         for member in sheetName:
             wb.create_sheet(member)
         for name in sheetName:
@@ -293,21 +293,21 @@ def main():
                     failureIndex = dataName.index(activeFailure[i][4])
                     msgReminder[failureIndex] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))                    
                     print(msgReminder[failureIndex])
-            previousTime = datetime.datetime.now()
-        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 10:
+            telePrevTime = datetime.datetime.now()
+        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 14:
             for i in range(0, 3):
                 sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
                 sendHarm = ((tuple(sendHarm)),)
                 sheetHarm = wb[sheetName[i]]
                 for row in sendHarm:
                     sheetHarm.append(row)
-            sendLog = [datetime.datetime.now().strftime("%H:%M:%S")] + sendLog + [maxStat, 0, 0, 0, 0, 0]
+            sendLog = [datetime.datetime.now().strftime("%H:%M:%S")] + inputData + [maxStat, 0, 0, 0, 0, 0]
             sendLog = ((tuple(sendLog)),)
             sheet = wb["Raw_data"]
             for row in sendLog:
                 sheet.append(row)
             print("add excel data here")
-            excelSavePrevTime = datetime.datetime.now()
+            excelRecordPrevTime = datetime.datetime.now()
         if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 300:
             print("save excel data here")
             excelSavePrevTime = datetime.datetime.now()
