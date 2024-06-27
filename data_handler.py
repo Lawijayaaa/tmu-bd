@@ -52,10 +52,9 @@ def main():
     previousTime = excelPrevTime = datetime.datetime.now()
     cursor.execute(sqlLibrary.sqlFailure)
     listFailure = cursor.fetchall()
-    activeFailure = []
     for i in range(0, len(listFailure)):
         if listFailure[i][2] == None:
-            activeFailure[i] = listFailure[i]
+            activeFailure[activeFailure.index(None)] = listFailure[i]
     print(activeFailure)
     
     while True:
@@ -80,10 +79,8 @@ def main():
         CTratio = trafoData[26]
 
         if len(activeFailure):
-            print(len(activeFailure))
-            print(len(activeParam))
             for i in range(0, len(activeFailure)):
-                if len(activeFailure[i]) > 1:
+                if activeFailure[i]:
                     activeParam[i] = activeFailure[i][4]
 
         for i in range(3, 5):
@@ -199,13 +196,9 @@ def main():
                         cursor.execute(sqlLibrary.sqlLastFailure)
                         lastActive = cursor.fetchall()[0]
                         activeFailure[activeFailure.index(None)] = lastActive
-                        loadProfile = str((data.value / trafoData[6]) * 100) + " Percent , Rated Current = " + str(trafoData[6])
+                        loadProfile = str((round((data.value / trafoData[6]) * 10000))/100) + " Percent , Rated Current = " + str(trafoData[6])
                         msgEvent[i] = str(data.name + " " + messageReason[data.status - 1] + " , Value = " + (loadProfile if i == 3 or i == 4 or i == 5 else str(data.value)) + "\n" + "Time Occurence : " + str(datetime.datetime.now()))
                     elif data.status == 3:
-                        print("check")
-                        print(activeFailure)
-                        print(activeParam)
-                        print(activeParam.index(data.name))
                         lastTimestamp = activeFailure[activeParam.index(data.name)][1]
                         duration = int((datetime.datetime.now() - lastTimestamp).total_seconds())
                         errorVal = [duration, activeFailure[activeParam.index(data.name)][0]]
@@ -216,22 +209,13 @@ def main():
                 i = i + 1
         
         if prevStat != currentStat or prevTrip != currentTrip:
-            """
             print("Send Telegram Lhooo")
-            print("Compare coba")
-            print(prevStat)
-            print(currentStat)
-            print(prevTrip)
-            print(currentTrip)
-            
             tele = list(filter(None, msgEvent))
             if tele:
-                print(tele)
+                for message in tele:
+                    print(message)
             else:
-                print("empty")
-                """
-            print("active Failure")
-            print(activeFailure)
+                pass
             cursor.execute(sqlLibrary.sqlUpdateTransformerStatus, currentStat)
             cursor.execute(sqlLibrary.sqlUpdateTripStatus, currentTrip)
             cursor.execute(sqlLibrary.sqlUpdateTrafoStat, (maxStat,))
@@ -256,17 +240,20 @@ def main():
             #print("okejek")
             pass
         
-        if int((datetime.datetime.now() - previousTime).total_seconds()) > 600:
-            for i in range(0, len(activeFailure)):
-                failureIndex = dataName.index(activeFailure[i][4])
-                msgReminder[failureIndex] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))
+        if int((datetime.datetime.now() - previousTime).total_seconds()) > 30:
             print("sekadar mengingatkan")
-            print(msgReminder)
+            for i in range(0, len(activeFailure)):
+                if activeFailure[i]:
+                    failureIndex = dataName.index(activeFailure[i][4])
+                    msgReminder[failureIndex] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))                    
+                    print(msgReminder[failureIndex])
             previousTime = datetime.datetime.now()
         #time.sleep(3.9)
         #for data in dataResult:
         #    print(vars(data))
-        #print("Loop time >> %s seconds" % (time.time() - start_time))
+        
+        cycleTime = time.time() - start_time
+        print("Loop time >> %s seconds" % cycleTime)
         #break
         
 if __name__ == "__main__":
