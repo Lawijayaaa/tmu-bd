@@ -1,7 +1,55 @@
 #from pymodbus.client import ModbusSerialClient
 from pymodbus.client import ModbusSerialClient
 from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser
-import mysql.connector, time, datetime, math
+from openpyxl import Workbook
+import mysql.connector, time, datetime, math, openpyxl
+
+engineName = " Trafo X"
+progStat = True
+
+def initWorkbook():
+    #init logger rawdata
+    ts = time.strftime("%Y%m%d")
+    pathStr = r'/home/pi/tmu-bd/assets/rawdata Test/datalogger-'
+    pathDatLog = pathStr + ts + engineName + '.xlsx'
+
+    try:
+        wb = openpyxl.load_workbook(pathDatLog)
+    except:
+        #create new datalog
+        workbook = Workbook()
+        workbook.save(pathDatLog)
+        #create datalog's header
+        wb = openpyxl.load_workbook(pathDatLog)
+        sheet = wb.active
+        sheet.title = "Raw_data"
+        name = (('timestamp', 
+                    'V-un', 'V-vn', 'V-wn', 'V-uv', 'V-vw', 'V-uw',
+                    'I-u', 'I-v', 'I-w', 'Itot', 'In',
+                    'THDV-u', 'THDV-v', 'THDV-w', 'THDI-u', 'THDI-v', 'THDI-w',
+                    'P-u', 'P-v', 'P-w', 'Ptot',
+                    'Q-u', 'Q-v', 'Q-w', 'Q-tot',
+                    'S-u', 'S-v', 'S-w', 'S-tot',
+                    'PF-u', 'PF-v', 'PF-w', 'PFavg', 'Freq', 'kWh', 'kVARh',
+                    'BusTemp-u', 'BusTemp-v', 'BusTemp-w', 'OilTemp',
+                    'WTITemp-u', 'WTITemp-v', 'WTITemp-w',  'Press', 'Level',
+                    'KRated-u', 'Derating-u', 'KRated-v', 'Derating-v', 'KRated-w', 'Derating-w',
+                    'H2ppm', 'Moistppm', 'Vdiff-uv', 'Vdiff-vw', 'Vdiff-uw',
+                    'trafoStatus', 'DIstat', 'DOstat', 'Alarm', 'Trip1', 'Trip2'),)
+        for row in name:
+            sheet.append(row)
+        sheetName = ["Harmonic_phR", "Harmonic_phS", "Harmonic_phT"]
+        for member in sheetName:
+            wb.create_sheet(member)
+        for name in sheetName:
+            sheetHarm = wb[name]
+            rows = (('timestamp', 'V 1st', 'V 3rd' , 'V 5th' , 'V 7th' , 'V 9th' , 'V 11th' , 'V 13th' , 'V 15th' ,
+                    'V 17th' , 'V 19th' , 'V 21st' , 'V 23rd' , 'V 25th' , 'V 27th' , 'V 29th' , 'V 31st',
+                    'I 1st', 'I 3rd' , 'I 5th' , 'I 7th' , 'I 9th' , 'I 11th' , 'I 13th' , 'I 15th' ,
+                    'I 17th' , 'I 19th' , 'I 21st' , 'I 23rd' , 'I 25th' , 'I 27th' , 'I 29th' , 'I 31st'),)
+            for row in rows:
+                sheetHarm.append(row)
+        wb.save(pathDatLog)
 
 def main():
     dataLen = 56
@@ -13,6 +61,7 @@ def main():
     loadCoef = 5
     cycleTime = 2 / 60
     
+    initWorkbook()
     client = ModbusSerialClient(method='rtu', port='/dev/ttyACM0', baudrate=9600)
     db = mysql.connector.connect(
         host = "localhost",
@@ -57,7 +106,7 @@ def main():
             activeFailure[activeFailure.index(None)] = listFailure[i]
     print(activeFailure)
     
-    while True:
+    while progStat:
         start_time = time.time()
         cursor.execute(sqlLibrary.sqlTrafoSetting)
         trafoSetting = cursor.fetchall()[0]
@@ -248,9 +297,10 @@ def main():
                     msgReminder[failureIndex] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))                    
                     print(msgReminder[failureIndex])
             previousTime = datetime.datetime.now()
-        #time.sleep(3.9)
-        #for data in dataResult:
-        #    print(vars(data))
+        if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 10:
+            print("add excel data here")
+        if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 300:
+            print("save excel data here")
         
         cycleTime = time.time() - start_time
         print("Loop time >> %s seconds" % cycleTime)

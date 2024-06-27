@@ -48,7 +48,7 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
                     "KRated V", "Derating V", 
                     "KRated W", "Derating W",
                     "H2 ppm", "Water Content ppm",
-                    "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W",]
+                    "Gap Voltage U-V", "Gap Voltage V-W", "Gap Voltage U-W"]
     iswatchBool = [False, False, False, True, True, True,
                     True, True, True, False, True, 
                     True, True, True, True, True, True,
