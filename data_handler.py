@@ -24,8 +24,8 @@ def main():
     inputData = [0]*dataLen
     currentStat = [0]*watchedData
     currentTrip = [0]*watchedData
-    activeParam = [0]*watchedData
-    activeFailure = []
+    dataName = ['']*watchedData
+    activeParam = [None]*watchedData
     kRated = [0, 0, 0]
     deRating = [0, 0, 0]
     hSquared = [0]*32
@@ -46,14 +46,16 @@ def main():
                 'Back Normal', 
                 'High', 
                 'Extreme High']
-    msgEvent = [""] * watchedData
-    msgReminder = [""] * watchedData
+    msgEvent = [None] * watchedData
+    msgReminder = [None] * watchedData
     previousTime = excelPrevTime = datetime.datetime.now()
     cursor.execute(sqlLibrary.sqlFailure)
     listFailure = cursor.fetchall()
+    activeFailure = []
     for i in range(0, len(listFailure)):
         if listFailure[i][2] == None:
             activeFailure.append(listFailure[i])
+    print(activeFailure)
     
     while True:
         start_time = time.time()
@@ -74,16 +76,13 @@ def main():
         cursor.execute(sqlLibrary.sqlTripStatus)
         prevTrip = list(cursor.fetchall()[0][1:])
         db.commit()
+        CTratio = trafoData[26]
 
-        if int((datetime.datetime.now() - previousTime).total_seconds()) > 3600:
-            for i in range(0, len(activeFailure)):
-                msgReminder[i] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))
-            
         if len(activeFailure):
+            print(len(activeFailure))
+            print(len(activeParam))
             for i in range(0, len(activeFailure)):
                 activeParam[i] = activeFailure[i][4]
-        else:
-            activeParam[0] = None
 
         for i in range(3, 5):
             if outputIO[i][2] == 1:
@@ -121,6 +120,11 @@ def main():
         inputData[39] = inputIO[6][2] #Oil Temp
         inputData[43] = inputIO[7][2] #Pressure
         inputData[44] = oilStat
+        #test parameter
+        inputData[4] = 430
+        inputData[32] = 1
+        inputData[53] = inputData[55] = 0
+        inputData[14] = 5
 
         for i in range(0, 3): loadFactor[i] = (inputData[i + 6])/trafoData[6]
         for i in range(0, 3):
@@ -177,6 +181,7 @@ def main():
                 maxStat = data.trafoStat if data.trafoStat > maxStat else maxStat
                 currentStat[i] = data.status
                 currentTrip[i] = data.trafoStat
+                dataName[i] = data.name
                 #print(data.name)
                 if data.status != prevStat[i]:
                     if data.status != 3:
@@ -186,29 +191,45 @@ def main():
                             errorVal = [duration, activeFailure[activeParam.index(data.name)][0]]
                             cursor.execute(sqlLibrary.sqlResolveFailure, errorVal)
                             activeFailure.pop(activeParam.index(data.name))
-                            activeParam.pop(activeParam.index(data.name))
+                            activeParam[activeParam.index(data.name)] = None
                         errorVal = [datetime.datetime.now(), messageReason[data.status - 1], data.name, str(data.value)]
                         cursor.execute(sqlLibrary.sqlInsertFailure, errorVal)
                         cursor.execute(sqlLibrary.sqlLastFailure)
                         lastActive = cursor.fetchall()[0]
                         activeFailure.append(lastActive)
                         loadProfile = str((data.value / trafoData[6]) * 100) + " Percent , Rated Current = " + str(trafoData[6])
-                        msgEvent[i] = str(data.name + " " + messageReason[data.status - 1] + " , Value = " + 
-                                        loadProfile if i == 18 or i == 19 or i == 20 else data.value +
-                                        "\n" + "Time Occurence : " + str(datetime.datetime.now()))
+                        msgEvent[i] = str(data.name + " " + messageReason[data.status - 1] + " , Value = " + (loadProfile if i == 3 or i == 4 or i == 5 else str(data.value)) + "\n" + "Time Occurence : " + str(datetime.datetime.now()))
                     elif data.status == 3:
+                        print("check")
+                        print(activeFailure)
+                        print(activeParam)
+                        print(activeParam.index(data.name))
                         lastTimestamp = activeFailure[activeParam.index(data.name)][1]
                         duration = int((datetime.datetime.now() - lastTimestamp).total_seconds())
                         errorVal = [duration, activeFailure[activeParam.index(data.name)][0]]
                         cursor.execute(sqlLibrary.sqlResolveFailure, errorVal)
                         activeFailure.pop(activeParam.index(data.name))
-                        activeParam.pop(activeParam.index(data.name))
+                        activeParam[activeParam.index(data.name)] = None
                         msgEvent[i] = None
                 i = i + 1
         
         if prevStat != currentStat or prevTrip != currentTrip:
-            print("lhoo")
-            print(msgEvent)
+            """
+            print("Send Telegram Lhooo")
+            print("Compare coba")
+            print(prevStat)
+            print(currentStat)
+            print(prevTrip)
+            print(currentTrip)
+            
+            tele = list(filter(None, msgEvent))
+            if tele:
+                print(tele)
+            else:
+                print("empty")
+                """
+            print("active Failure")
+            print(activeFailure)
             cursor.execute(sqlLibrary.sqlUpdateTransformerStatus, currentStat)
             cursor.execute(sqlLibrary.sqlUpdateTripStatus, currentTrip)
             cursor.execute(sqlLibrary.sqlUpdateTrafoStat, (maxStat,))
@@ -230,12 +251,20 @@ def main():
                 client.write_coil(1, False, slave = 3)
                 client.write_coil(2, False, slave = 3)
         else:
-            print("okejek")
+            #print("okejek")
+            pass
         
+        if int((datetime.datetime.now() - previousTime).total_seconds()) > 600:
+            for i in range(0, len(activeFailure)):
+                failureIndex = dataName.index(activeFailure[i][4])
+                msgReminder[failureIndex] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))
+            print("sekadar mengingatkan")
+            print(msgReminder)
+            previousTime = datetime.datetime.now()
         #time.sleep(3.9)
         #for data in dataResult:
         #    print(vars(data))
-        print("Loop time >> %s seconds" % (time.time() - start_time))
+        #print("Loop time >> %s seconds" % (time.time() - start_time))
         #break
         
 if __name__ == "__main__":

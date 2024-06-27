@@ -63,8 +63,8 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     for i in range(0, 3):
         paramThreshold[0][i+3] = trafoSetting[2] #low trip Voltage
         paramThreshold[1][i+3] = trafoSetting[4] #low alarm Voltage
-        paramThreshold[2][i+3] = trafoSetting[6] #high alarm Voltage
-        paramThreshold[3][i+3] = trafoSetting[8] #high trip Voltage
+        paramThreshold[2][i+3] = trafoSetting[8] #high alarm Voltage
+        paramThreshold[3][i+3] = trafoSetting[6] #high trip Voltage
         paramThreshold[2][i+53] = (trafoSetting[9] * trafoData[4])/(100 * math.sqrt(3)) #high alarm gap Voltage
         paramThreshold[3][i+53] = (trafoSetting[10] * trafoData[4])/(100 * math.sqrt(3)) #high trip gap Voltage
         paramThreshold[2][i+6] = (trafoSetting[21] * trafoData[6])/100 #high alarm Current Profile
