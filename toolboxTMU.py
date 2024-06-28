@@ -427,141 +427,166 @@ def initTkinter():
         screen.attributes('-topmost', True)
         screen.configure(background='#17C0EB')
 
-        restartBtn = tk.Button(
+        restartBtn1 = tk.Button(
             screen,
-            text = "Restart")
-        startBtn = tk.Button(
+            text = "Restart",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        startBtn1 = tk.Button(
             screen,
-            text = "Start")
-        stopBtn = tk.Button(
+            text = "Start",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        stopBtn1 = tk.Button(
             screen,
-            text = "Stop")
+            text = "Stop",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
         
-        progStatTxt = tk.Label(
+        prog1Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12),
-                text = "Program Status"
+                font = ("Helvetica",16),
+                text = "Data Handler Status"
                 )
-        progStatLbl = tk.Label(
+        prog1Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
+                font = ("Helvetica",16)
                 )
-        lastTsTxt = tk.Label(
+        lastHB1Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12),
-                text = "Last Timestamp"
+                font = ("Helvetica",16),
+                text = "Last Heartbeat"
                 )
-        lastTsLbl = tk.Label(
+        lastHB1Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
+                font = ("Helvetica",16)
                 )
-        trafoStatTxt = tk.Label(
+        
+        restartBtn2 = tk.Button(
+            screen,
+            text = "Restart",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        startBtn2 = tk.Button(
+            screen,
+            text = "Start",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        stopBtn2 = tk.Button(
+            screen,
+            text = "Stop",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        
+        prog2Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12),
-                text = "Trafo Status"
+                font = ("Helvetica",16),
+                text = "Module IO Status"
                 )
-        trafoStatLbl = tk.Label(
+        prog2Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
-                )        
-        firstDatTxt = tk.Label(
-                screen,
-                font = ("Helvetica",12),
-                text = "First Data Sequence"
+                font = ("Helvetica",16)
                 )
-        firstDatLbl = tk.Label(
+        lastHB2Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12)
-                )        
-        secondDatTxt = tk.Label(
-                screen,
-                font = ("Helvetica",12),
-                text = "Second Data Sequence"
+                font = ("Helvetica",16),
+                text = "Last Heartbeat"
                 )
-        secondDatLbl = tk.Label(
+        lastHB2Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
+                font = ("Helvetica",16)
                 )
-        thirdDatTxt = tk.Label(
+        
+        restartBtn3 = tk.Button(
+            screen,
+            text = "Restart",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        startBtn3 = tk.Button(
+            screen,
+            text = "Start",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        stopBtn3 = tk.Button(
+            screen,
+            text = "Stop",
+            font = ("Helvetica",16),
+            height = 1,
+            width = 7)
+        
+        prog3Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12),
-                text = "Third Data Sequence"
+                font = ("Helvetica",16),
+                text = "Modbus TCP Status"
                 )
-        thirdDatLbl = tk.Label(
+        prog3Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
+                font = ("Helvetica",16)
                 )
-        fourthDatTxt = tk.Label(
+        lastHB3Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12),
-                text = "Fourth Data Sequence"
+                font = ("Helvetica",16),
+                text = "Last Heartbeat"
                 )
-        fourthDatLbl = tk.Label(
+        lastHB3Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
+                font = ("Helvetica",16)
                 )
-        DITxt = tk.Label(
-                screen,
-                font = ("Helvetica",12),
-                text = "DI status"
-                )
-        DILbl = tk.Label(
-                screen,
-                font = ("Helvetica",12)
-                )
-        AITxt = tk.Label(
-                screen,
-                font = ("Helvetica",12),
-                text = "AI status"
-                )
-        AILbl = tk.Label(
-                screen,
-                font = ("Helvetica",12)
-                )
+        
         debug1Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12),
+                font = ("Helvetica",16),
                 text = "Debug message 1"
                 )
         debug1Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
+                font = ("Helvetica",16)
                 )
         debug2Txt = tk.Label(
                 screen,
-                font = ("Helvetica",12),
+                font = ("Helvetica",16),
                 text = "Debug message 2"
                 )
         debug2Lbl = tk.Label(
                 screen,
-                font = ("Helvetica",12)
+                font = ("Helvetica",16)
                 )
     mainScreen = MyScreen()
-    mainScreen.progStatTxt.place(x = 10, y = 50)
-    mainScreen.lastTsTxt.place(x = 10, y = 100)
-    mainScreen.trafoStatTxt.place(x = 10, y = 150)
-    mainScreen.firstDatTxt.place(x = 10, y = 200)
-    mainScreen.secondDatTxt.place(x = 10, y = 250)
-    mainScreen.thirdDatTxt.place(x = 10, y = 300)
-    mainScreen.fourthDatTxt.place(x = 10, y = 350)
-    mainScreen.DITxt.place(x = 10, y = 400)
-    mainScreen.AITxt.place(x = 10, y = 450)
+    mainScreen.prog1Txt.place(x = 10, y = 50)
+    mainScreen.lastHB1Txt.place(x = 10, y = 105)
+    mainScreen.prog2Txt.place(x = 10, y = 200)
+    mainScreen.lastHB2Txt.place(x = 10, y = 255)
+    mainScreen.prog3Txt.place(x = 10, y = 350)
+    mainScreen.lastHB3Txt.place(x = 10, y = 405)
     mainScreen.debug1Txt.place(x = 10, y = 500)
-    mainScreen.debug2Txt.place(x = 10, y = 550)
+    mainScreen.debug2Txt.place(x = 10, y = 555)
 
-    mainScreen.progStatLbl.place(x = 225, y = 50)
-    mainScreen.lastTsLbl.place(x = 225, y = 100)
-    mainScreen.trafoStatLbl.place(x = 225, y = 150)
-    mainScreen.firstDatLbl.place(x = 225, y = 200)
-    mainScreen.secondDatLbl.place(x = 225, y = 250)
-    mainScreen.thirdDatLbl.place(x = 225, y = 300)
-    mainScreen.fourthDatLbl.place(x = 225, y = 350)
-    mainScreen.DILbl.place(x = 225, y = 400)
-    mainScreen.AILbl.place(x = 225, y = 450)
+    mainScreen.prog1Lbl.place(x = 225, y = 50)
+    mainScreen.lastHB1Lbl.place(x = 225, y = 105)
+    mainScreen.prog2Lbl.place(x = 225, y = 200)
+    mainScreen.lastHB2Lbl.place(x = 225, y = 255)
+    mainScreen.prog3Lbl.place(x = 225, y = 350)
+    mainScreen.lastHB3Lbl.place(x = 225, y = 405)
     mainScreen.debug1Lbl.place(x = 225, y = 500)
-    mainScreen.debug2Lbl.place(x = 225, y = 550)
+    mainScreen.debug2Lbl.place(x = 225, y = 555)
 
-    mainScreen.restartBtn.place(x = 915, y = 630)
-    mainScreen.startBtn.place(x = 815, y = 630)
-    mainScreen.stopBtn.place(x = 715, y = 630)
+    mainScreen.restartBtn1.place(x = 530, y = 45)
+    mainScreen.startBtn1.place(x = 430, y = 45)
+    mainScreen.stopBtn1.place(x = 330, y = 45)
+
+    mainScreen.restartBtn2.place(x = 530, y = 195)
+    mainScreen.startBtn2.place(x = 430, y = 195)
+    mainScreen.stopBtn2.place(x = 330, y = 195)
+
+    mainScreen.restartBtn3.place(x = 530, y = 345)
+    mainScreen.startBtn3.place(x = 430, y = 345)
+    mainScreen.stopBtn3.place(x = 330, y = 345)
     return mainScreen
