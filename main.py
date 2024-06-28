@@ -21,7 +21,7 @@ def mainloop(thread_name, interval):
 
 #restart program
 def Restart():
-    os.execv(sys.executable, [sys.executable] + ['/main.py'])
+    os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/main.py'])
 
 #continue program
 def Start():
