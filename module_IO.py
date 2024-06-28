@@ -128,8 +128,9 @@ def main():
                 resetBuzz = False
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
-        sleep(0.25)
+        sleep(0.2)
         print("Loop time >> %s seconds" % (time.time() - start_time))
+        break
     
 if __name__ == "__main__":
     main()

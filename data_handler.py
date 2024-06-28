@@ -4,7 +4,7 @@ from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmoni
 from openpyxl import Workbook
 import mysql.connector, time, datetime, math, openpyxl
 
-engineName = " Trafo X"
+engineName = " Trafo X "
 progStat = True
 
 def main():
@@ -101,7 +101,7 @@ def main():
     for i in range(0, len(listFailure)):
         if listFailure[i][2] == None:
             activeFailure[activeFailure.index(None)] = listFailure[i]
-    print(activeFailure)
+    #print(activeFailure)
     
     while progStat:
         start_time = time.time()
@@ -166,10 +166,10 @@ def main():
         inputData[43] = inputIO[7][2] #Pressure
         inputData[44] = oilStat
         #test parameter
-        inputData[4] = 430
-        inputData[32] = 1
-        inputData[53] = inputData[55] = 0
-        inputData[14] = 5
+        #inputData[4] = 430
+        #inputData[32] = 1
+        #inputData[53] = inputData[55] = 0
+        #inputData[14] = 5
 
         for i in range(0, 3): loadFactor[i] = (inputData[i + 6])/trafoData[6]
         for i in range(0, 3):
@@ -255,11 +255,12 @@ def main():
                 i = i + 1
         
         if prevStat != currentStat or prevTrip != currentTrip:
-            print("Send Telegram Lhooo")
+            #print("Send Telegram Lhooo")
             tele = list(filter(None, msgEvent))
             if tele:
                 for message in tele:
-                    print(message)
+                    pass
+                    #print(message)
             else:
                 pass
             cursor.execute(sqlLibrary.sqlUpdateTransformerStatus, currentStat)
@@ -286,15 +287,16 @@ def main():
             #print("okejek")
             pass
         
-        if int((datetime.datetime.now() - telePrevTime).total_seconds()) > 30:
-            print("sekadar mengingatkan")
+        if int((datetime.datetime.now() - telePrevTime).total_seconds()) > 3600:
+            #print("sekadar mengingatkan")
             for i in range(0, len(activeFailure)):
                 if activeFailure[i]:
                     failureIndex = dataName.index(activeFailure[i][4])
                     msgReminder[failureIndex] = str(activeFailure[i][4] + " " + activeFailure[i][3] + " , Value = " + activeFailure[i][5] + "\n" + "Time Occurence : " + str(activeFailure[i][1]))                    
-                    print(msgReminder[failureIndex])
+                    #print(msgReminder[failureIndex])
             telePrevTime = datetime.datetime.now()
-        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 14:
+        #print(inputData)
+        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 5:
             for i in range(0, 3):
                 sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
                 sendHarm = ((tuple(sendHarm)),)
@@ -306,15 +308,14 @@ def main():
             sheet = wb["Raw_data"]
             for row in sendLog:
                 sheet.append(row)
-            print("add excel data here")
+            print("Heartbeat >> %s " % datetime.datetime.now())
             excelRecordPrevTime = datetime.datetime.now()
         if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 300:
-            print("save excel data here")
+            #print("save excel data here")
             excelSavePrevTime = datetime.datetime.now()
             wb.save(pathDatLog)
         cycleTime = time.time() - start_time
         print("Loop time >> %s seconds" % cycleTime)
-        #break
         
 if __name__ == "__main__":
     main()
