@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 import Adafruit_ADS1x15
 import mysql.connector
 import json
-import time
+import time, datetime, sys
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(13, GPIO.IN)
@@ -128,9 +128,9 @@ def main():
                 resetBuzz = False
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
-        sleep(0.2)
-        print("Loop time >> %s seconds" % (time.time() - start_time))
-        break
+        sleep(0.5)
+        print("2|%s" % datetime.datetime.now())
+        sys.stdout.flush()
     
 if __name__ == "__main__":
     main()

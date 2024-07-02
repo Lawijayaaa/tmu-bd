@@ -2,7 +2,7 @@
 from pymodbus.client import ModbusSerialClient
 from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser
 from openpyxl import Workbook
-import mysql.connector, time, datetime, math, openpyxl
+import mysql.connector, time, datetime, math, openpyxl, sys
 
 engineName = " Trafo X "
 progStat = True
@@ -128,13 +128,13 @@ def main():
             for i in range(0, len(activeFailure)):
                 if activeFailure[i]:
                     activeParam[i] = activeFailure[i][4]
-
-        for i in range(3, 5):
+        
+        for i in range(0, 5):
             if outputIO[i][2] == 1:
                 client.write_coil(i, True, slave = 3)
             elif outputIO[i][2] == 0:
                 client.write_coil(i, False, slave = 3)
-
+                
         getTemp = client.read_holding_registers(4, 3, slave = 1)
         getElect1 = client.read_holding_registers(0, 29, slave = 2)
         getElect2 = client.read_holding_registers(46, 5, slave = 2)
@@ -267,22 +267,7 @@ def main():
             cursor.execute(sqlLibrary.sqlUpdateTripStatus, currentTrip)
             cursor.execute(sqlLibrary.sqlUpdateTrafoStat, (maxStat,))
             db.commit()
-            if maxStat == 1:
-                client.write_coil(0, True, slave = 3)
-                client.write_coil(1, False, slave = 3)
-                client.write_coil(2, False, slave = 3)
-            elif maxStat == 2:
-                client.write_coil(0, True, slave = 3)
-                client.write_coil(1, True, slave = 3)
-                client.write_coil(2, False, slave = 3)
-            elif maxStat == 3:
-                client.write_coil(0, True, slave = 3)
-                client.write_coil(1, False, slave = 3)
-                client.write_coil(2, True, slave = 3)
-            else:
-                client.write_coil(0, False, slave = 3)
-                client.write_coil(1, False, slave = 3)
-                client.write_coil(2, False, slave = 3)
+            
         else:
             #print("okejek")
             pass
@@ -308,14 +293,15 @@ def main():
             sheet = wb["Raw_data"]
             for row in sendLog:
                 sheet.append(row)
-            print("Heartbeat >> %s " % datetime.datetime.now())
+            #print("Heartbeat >> %s " % datetime.datetime.now())
             excelRecordPrevTime = datetime.datetime.now()
         if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 300:
             #print("save excel data here")
             excelSavePrevTime = datetime.datetime.now()
             wb.save(pathDatLog)
-        cycleTime = time.time() - start_time
-        print("Loop time >> %s seconds" % cycleTime)
+        #cycleTime = time.time() - start_time
+        print("1|%s" % datetime.datetime.now())
+        sys.stdout.flush()
         
 if __name__ == "__main__":
     main()

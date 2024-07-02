@@ -1,0 +1,129 @@
+import threading
+import subprocess
+import time
+import os
+import sys
+import datetime
+from toolboxTMU import initTkinter
+from tkinter import Tk
+
+class App:
+    def __init__(self):
+        self.engineName = "Trafo X"
+        self.progStat = [True, True, False]
+        self.startFlag = [False, False, False]
+        self.stopFlag = [False, False, False]
+        self.stream1 = "init"
+        self.stream2 = "init"
+        self.stream3 = "init"
+        
+        self.proc1 = None
+        self.proc2 = None
+        
+        self.mainScreen = initTkinter()
+        self.mainScreen.restartBtn["command"] = self.restart
+        self.mainScreen.stopBtn1["command"] = self.stop1
+        self.mainScreen.stopBtn2["command"] = self.stop2
+        self.mainScreen.stopBtn3["command"] = self.stop3
+        self.mainScreen.stopBtn3["state"] = 'disabled'
+
+        self.thread1 = threading.Thread(target=self.streamProc, args=(1,))
+        self.thread2 = threading.Thread(target=self.streamProc, args=(2,))
+        self.thread3 = threading.Thread(target=self.updateTk, args=(1,))
+        
+        self.thread1.start()
+        self.thread2.start()
+        self.thread3.start()
+        
+        self.mainScreen.screen.mainloop()
+
+    def startProc1(self):
+        return subprocess.Popen(["python3", "data_handler.py"], stdout=subprocess.PIPE)
+
+    def startProc2(self):
+        return subprocess.Popen(["python3", "module_IO.py"], stdout=subprocess.PIPE)
+
+    def streamProc(self, proc_num):
+        print("streaming")
+        proc = self.proc1 if proc_num == 1 else self.proc2
+        if not proc:
+            return
+        with proc.stdout:
+            for line in iter(proc.stdout.readline, b''):
+                code = line[0:1]
+                heartbeat = line[2:].decode("utf-8")
+                if code == b'2':
+                    self.stream2 = heartbeat
+                elif code == b'1':
+                    self.stream1 = heartbeat
+                else:
+                    print("error")
+                print(code)
+                print(proc.stdout)
+    
+    def updateTk(self, interval):
+        while True:
+            if self.startFlag[0]:
+                self.proc1 = self.startProc1()
+                self.startFlag[0] = False
+            if self.startFlag[1]:
+                self.proc2 = self.startProc2()
+                self.startFlag[1] = False
+            if self.stopFlag[0]:
+                self.proc1.terminate()
+                self.stopFlag[0] = False
+            if self.stopFlag[1]:
+                self.proc2.terminate()
+                self.stopFlag[1] = False
+
+            self.mainScreen.lastHB1Lbl['text'] = self.stream1
+            self.mainScreen.lastHB2Lbl['text'] = self.stream2
+            self.mainScreen.lastHB3Lbl['text'] = self.stream3
+
+            self.updateButtons()
+            
+            time.sleep(interval)
+
+    def updateButtons(self):
+        if self.progStat[0]:
+            self.mainScreen.prog1Lbl['text'] = "Running"
+            self.mainScreen.stopBtn1['state'] = 'normal'
+        else:
+            self.mainScreen.prog1Lbl["text"] = "Stop"
+            self.mainScreen.stopBtn1['state'] = 'disabled'
+
+        if self.progStat[1]:
+            self.mainScreen.prog2Lbl['text'] = "Running"
+            self.mainScreen.stopBtn2['state'] = 'normal'
+        else:
+            self.mainScreen.prog2Lbl["text"] = "Stop"
+            self.mainScreen.stopBtn2['state'] = 'disabled'
+
+        if self.progStat[2]:
+            self.mainScreen.prog3Lbl['text'] = "Running"
+            self.mainScreen.stopBtn3['state'] = 'normal'
+        else:
+            self.mainScreen.prog3Lbl["text"] = "Stop"
+
+    def restart(self):
+        if self.proc1:
+            self.proc1.terminate()
+        if self.proc2:
+            self.proc2.terminate()
+        time.sleep(1)
+        os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/main.py'])
+
+    def stop1(self):
+        self.stopFlag[0] = True
+        self.progStat[0] = False
+
+    def stop2(self):
+        self.stopFlag[1] = True
+        self.progStat[1] = False
+    
+    def stop3(self):
+        self.stopFlag[2] = True
+        self.progStat[2] = False
+
+if __name__ == "__main__":
+    app = App()

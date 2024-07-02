@@ -427,15 +427,9 @@ def initTkinter():
         screen.attributes('-topmost', True)
         screen.configure(background='#17C0EB')
 
-        restartBtn1 = tk.Button(
+        restartBtn = tk.Button(
             screen,
             text = "Restart",
-            font = ("Helvetica",16),
-            height = 1,
-            width = 7)
-        startBtn1 = tk.Button(
-            screen,
-            text = "Start",
             font = ("Helvetica",16),
             height = 1,
             width = 7)
@@ -445,7 +439,6 @@ def initTkinter():
             font = ("Helvetica",16),
             height = 1,
             width = 7)
-        
         prog1Txt = tk.Label(
                 screen,
                 font = ("Helvetica",16),
@@ -464,26 +457,12 @@ def initTkinter():
                 screen,
                 font = ("Helvetica",16)
                 )
-        
-        restartBtn2 = tk.Button(
-            screen,
-            text = "Restart",
-            font = ("Helvetica",16),
-            height = 1,
-            width = 7)
-        startBtn2 = tk.Button(
-            screen,
-            text = "Start",
-            font = ("Helvetica",16),
-            height = 1,
-            width = 7)
         stopBtn2 = tk.Button(
             screen,
             text = "Stop",
             font = ("Helvetica",16),
             height = 1,
             width = 7)
-        
         prog2Txt = tk.Label(
                 screen,
                 font = ("Helvetica",16),
@@ -502,26 +481,12 @@ def initTkinter():
                 screen,
                 font = ("Helvetica",16)
                 )
-        
-        restartBtn3 = tk.Button(
-            screen,
-            text = "Restart",
-            font = ("Helvetica",16),
-            height = 1,
-            width = 7)
-        startBtn3 = tk.Button(
-            screen,
-            text = "Start",
-            font = ("Helvetica",16),
-            height = 1,
-            width = 7)
         stopBtn3 = tk.Button(
             screen,
             text = "Stop",
             font = ("Helvetica",16),
             height = 1,
             width = 7)
-        
         prog3Txt = tk.Label(
                 screen,
                 font = ("Helvetica",16),
@@ -540,7 +505,6 @@ def initTkinter():
                 screen,
                 font = ("Helvetica",16)
                 )
-        
         debug1Txt = tk.Label(
                 screen,
                 font = ("Helvetica",16),
@@ -578,15 +542,8 @@ def initTkinter():
     mainScreen.debug1Lbl.place(x = 225, y = 500)
     mainScreen.debug2Lbl.place(x = 225, y = 555)
 
-    mainScreen.restartBtn1.place(x = 575, y = 45)
-    mainScreen.startBtn1.place(x = 450, y = 45)
+    mainScreen.restartBtn.place(x = 10, y = 625)
     mainScreen.stopBtn1.place(x = 325, y = 45)
-
-    mainScreen.restartBtn2.place(x = 575, y = 195)
-    mainScreen.startBtn2.place(x = 450, y = 195)
     mainScreen.stopBtn2.place(x = 325, y = 195)
-
-    mainScreen.restartBtn3.place(x = 575, y = 345)
-    mainScreen.startBtn3.place(x = 450, y = 345)
     mainScreen.stopBtn3.place(x = 325, y = 345)
     return mainScreen
