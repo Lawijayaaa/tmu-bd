@@ -1,118 +1,90 @@
-import threading, subprocess, time
-import os, sys, datetime
+import threading
+import subprocess
+import time
+import os
+import sys
 from toolboxTMU import initTkinter
 
-#init value
-engineName = " Trafo X"
-progStat = [True, True, False]
-startFlag = [False, False, False]
-stopFlag = [False, False, False]
-stream1 = "init"
-stream2 = "init"
-stream3 = "init"
-
-def startProc1():
-    return subprocess.Popen(["python3", "data_handler.py"],
-                            stdout = subprocess.PIPE)
-
-def startProc2():
-    return subprocess.Popen(["python3", "module_IO.py"],
-                            stdout = subprocess.PIPE)
-
-def streamProc(proc, interval):
-    global stream1, stream2
-    with proc.stdout:
-        for line in iter(proc.stdout.readline, b''):
-            code = line[0:1]
-            heartbeat = line[2:].decode("utf-8")
-            if code == b'2' :
-                stream2 = heartbeat
-            elif code == b'1':
-                stream1 = heartbeat
-            else :
-                print("error")
-                
-#main program
-def updateTk(proc1, proc2, interval):
-    global progStat, startFlag, stopFlag
-    #main loop
-    while True:
-        if startFlag[0]:
-            proc1 = startProc1()
-            startFlag[0] = False
-        if startFlag[1]:
-            proc2 = startProc2()
-            startFlag[1] = False
-        if stopFlag[0]:
-            proc1.terminate()
-            stopFlag[0] = False
-        if stopFlag[1]:
-            proc2.terminate()
-            stopFlag[1] = False
+class App:
+    def __init__(self):
+        self.progStat = [True, True, False]
+        self.stopFlag = [False, False, False]
+        self.streams = ["init", "init", "init"]
         
-        mainScreen.lastHB1Lbl['text'] = stream1
-        mainScreen.lastHB2Lbl['text'] = stream2
-        mainScreen.lastHB3Lbl['text'] = stream3
-        if progStat[0]:
-            mainScreen.prog1Lbl['text'] = "Running"
-            mainScreen.stopBtn1['state'] = 'normal'
-        else:
-            mainScreen.prog1Lbl["text"] = "Stop"
-            mainScreen.stopBtn1['state'] = 'disabled'
-            
-        if progStat[1]:
-            mainScreen.prog2Lbl['text'] = "Running"
-            mainScreen.stopBtn2['state'] = 'normal'
-        else:
-            mainScreen.prog2Lbl["text"] = "Stop"
-            mainScreen.stopBtn2['state'] = 'disabled'
-            
-        if progStat[2]:
-            mainScreen.prog3Lbl['text'] = "Running"
-            mainScreen.stopBtn3['state'] = 'normal'
-        else:
-            mainScreen.prog3Lbl["text"] = "Stop"
-            # mainScreen.startBtn3['state'] = 'normal'
-            # mainScreen.stopBtn3['state'] = 'disabled'
-        time.sleep(0.5)
-    
-def Restart():
-    proc1.terminate()
-    proc2.terminate()
-    time.sleep(1)
-    os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/main.py'])
+        self.proc1 = self.start_proc("/home/pi/tmu-bd/data_handler.py")
+        self.proc2 = self.start_proc("/home/pi/tmu-bd/module_IO.py")
+        
+        self.main_screen = initTkinter()
+        self.main_screen.restartBtn["command"] = self.restart
+        self.main_screen.stopBtn1["command"] = self.stop_proc1
+        self.main_screen.stopBtn2["command"] = self.stop_proc2
+        self.main_screen.stopBtn3["command"] = self.stop_proc3
+        self.main_screen.stopBtn3["state"] = 'disabled'
 
-def Stop1():
-    global progStat, stopFlag
-    stopFlag[0] = True
-    progStat[0] = False
+        self.thread1 = threading.Thread(target=self.stream_proc, args=(self.proc1, 1))
+        self.thread2 = threading.Thread(target=self.stream_proc, args=(self.proc2, 1))
+        self.thread3 = threading.Thread(target=self.update_tk, args=(1,))
+        
+        self.thread1.start()
+        self.thread2.start()
+        self.thread3.start()
+        
+        self.main_screen.screen.mainloop()
 
-def Stop2():
-    global progStat, stopFlag
-    stopFlag[1] = True
-    progStat[1] = False
+    def start_proc(self, script):
+        return subprocess.Popen(["python3", script], stdout=subprocess.PIPE)
+
+    def stream_proc(self, proc, index):
+        with proc.stdout:
+            for line in iter(proc.stdout.readline, b''):
+                code = line[0:1]
+                heartbeat = line[2:].decode("utf-8").strip()
+                if code == b'1':
+                    self.streams[0] = heartbeat
+                elif code == b'2':
+                    self.streams[1] = heartbeat
+                else:
+                    print("error: unexpected code", code)
+
+    def update_tk(self, interval):
+        while True:
+            self.main_screen.lastHB1Lbl['text'] = self.streams[0]
+            self.main_screen.lastHB2Lbl['text'] = self.streams[1]
+            self.main_screen.lastHB3Lbl['text'] = self.streams[2]
+
+            self.update_buttons()
+            
+            time.sleep(interval)
+
+    def update_buttons(self):
+        self.main_screen.prog1Lbl['text'] = "Running" if self.progStat[0] else "Stop"
+        self.main_screen.stopBtn1['state'] = 'normal' if self.progStat[0] else 'disabled'
+
+        self.main_screen.prog2Lbl['text'] = "Running" if self.progStat[1] else "Stop"
+        self.main_screen.stopBtn2['state'] = 'normal' if self.progStat[1] else 'disabled'
+
+        self.main_screen.prog3Lbl['text'] = "Running" if self.progStat[2] else "Stop"
+        self.main_screen.stopBtn3['state'] = 'normal' if self.progStat[2] else 'disabled'
+
+    def restart(self):
+        if self.proc1:
+            self.proc1.terminate()
+        if self.proc2:
+            self.proc2.terminate()
+        time.sleep(1)
+        os.execv(sys.executable, [sys.executable] + ['/home/pi/tmu-bd/main.py'])
+
+    def stop_proc1(self):
+        self.proc1.terminate()
+        self.progStat[0] = False
+
+    def stop_proc2(self):
+        self.proc2.terminate()
+        self.progStat[1] = False
     
-def Stop3():
-    global progStat, stopFlag
-    stopFlag[2] = True
-    progStat[2] = False
+    def stop_proc3(self):
+        self.progStat[2] = False
 
 if __name__ == "__main__":
-    proc1 = startProc1()
-    proc2 = startProc2()
-    #import tkinter, connect buttons with function
-    mainScreen = initTkinter()
-    mainScreen.restartBtn["command"] = Restart
-    mainScreen.stopBtn1["command"] = Stop1
-    mainScreen.stopBtn2["command"] = Stop2
-    mainScreen.stopBtn3["command"] = Stop3
-    mainScreen.stopBtn3["state"] = 'disabled'
-    #threading to multi process between tkinter and main program
-    thread1 = threading.Thread(target = streamProc, args=(proc1, 1))
-    thread1.start()
-    thread2 = threading.Thread(target = streamProc, args=(proc2, 1))
-    thread2.start()
-    thread3 = threading.Thread(target = updateTk, args=(proc1, proc2, 1))
-    thread3.start()
-    #start tkinter
-    mainScreen.screen.mainloop()
+    app = App()
+
