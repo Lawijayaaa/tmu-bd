@@ -7,7 +7,10 @@ import sys
 import logging
 from toolboxTMU import initTkinter
 
-logging.basicConfig(filename='/home/pi/tmu-bd/app.log', level=logging.INFO)
+ts = time.strftime("%Y%m%d")
+logName = r'/home/pi/tmu-bd/assets/sysdata Test/syslog-' + ts + '.log'
+logging.basicConfig(filename=logName, format='(asctime)s | %(levelname)s: %(message)s',level=logging.DEBUG)
+
 os.chdir('/home/pi/tmu-bd/')
 
 class App:
@@ -17,11 +20,8 @@ class App:
         self.stopFlag = [False, False, False]
         self.streams = ["init", "init", "init"]
         
-        logging.debug(f"Current working directory: {os.getcwd()}")
-        logging.debug(f"Files in current directory: {os.listdir(os.getcwd())}")
-        
         self.proc2 = self.start_proc("module_IO.py")
-        time.sleep(2)
+        time.sleep(1)
         self.proc1 = self.start_proc("data_handler.py")
         
         self.main_screen = initTkinter()
@@ -34,7 +34,7 @@ class App:
         self.thread1 = threading.Thread(target=self.stream_proc, args=(self.proc1, 0))
         self.thread2 = threading.Thread(target=self.stream_proc, args=(self.proc2, 1))
         self.thread3 = threading.Thread(target=self.update_tk, args=(1,))
-        self.thread4 = threading.Thread(target=self.watchdog, args=(4,))
+        self.thread4 = threading.Thread(target=self.watchdog, args=(10,))
         
         self.thread1.start()
         self.thread2.start()
@@ -95,12 +95,16 @@ class App:
             lastLabel1 = self.main_screen.lastHB1Lbl['text']
             lastLabel2 = self.main_screen.lastHB2Lbl['text']
             while True:
-                nowDays = datetime.datetime.now().day
+                nowTime = datetime.datetime.now()
                 time.sleep(interval)
                 currentLabel1 = self.main_screen.lastHB1Lbl['text']
                 currentLabel2 = self.main_screen.lastHB2Lbl['text']
-                if lastLabel1 == currentLabel1 or lastLabel2 == currentLabel2 or anchorDays != nowDays:
-                    self.restart()
+                if lastLabel1 == currentLabel1 or lastLabel2 == currentLabel2 or anchorDays != nowTime.day:
+                    if self.progStat[0] and self.progStat[1]:
+                        self.restart()
+                        logging.info(f"Restarting machine: {nowTime}")
+                    else:
+                        pass
                 else:
                     lastLabel1 = currentLabel1
                     lastLabel2 = currentLabel2

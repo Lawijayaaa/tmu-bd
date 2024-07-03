@@ -281,7 +281,7 @@ def main():
                     #print(msgReminder[failureIndex])
             telePrevTime = datetime.datetime.now()
         #print(inputData)
-        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 5:
+        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 10:
             for i in range(0, 3):
                 sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
                 sendHarm = ((tuple(sendHarm)),)
@@ -295,7 +295,7 @@ def main():
                 sheet.append(row)
             #print("Heartbeat >> %s " % datetime.datetime.now())
             excelRecordPrevTime = datetime.datetime.now()
-        if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 300:
+        if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 150:
             #print("save excel data here")
             excelSavePrevTime = datetime.datetime.now()
             wb.save(pathDatLog)
