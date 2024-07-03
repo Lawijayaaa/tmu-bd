@@ -2,7 +2,7 @@
 from pymodbus.client import ModbusSerialClient
 from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser
 from openpyxl import Workbook
-import mysql.connector, time, datetime, math, openpyxl, sys
+import mysql.connector, time, datetime, math, openpyxl, sys, shutil
 
 engineName = " Trafo X "
 progStat = True
@@ -30,6 +30,9 @@ def main():
     pathStr = r'/home/pi/tmu-bd/assets/rawdata Test/datalogger-'
     pathDatLog = pathStr + ts + engineName + '.xlsx'
     sheetName = ["Harmonic_phR", "Harmonic_phS", "Harmonic_phT"]
+    pathBkup = r'/home/pi/tmu-bd/assets/rawdata Test/backup/datalogger-backup-'
+    pathDatBkup = pathBkup + ts + engineName + '.xlsx'
+    
     try:
         wb = openpyxl.load_workbook(pathDatLog)
     except:
@@ -95,7 +98,7 @@ def main():
                 'Extreme High']
     msgEvent = [None] * watchedData
     msgReminder = [None] * watchedData
-    telePrevTime = excelRecordPrevTime = excelSavePrevTime = datetime.datetime.now()
+    telePrevTime = excelPrevTime = datetime.datetime.now()
     cursor.execute(sqlLibrary.sqlFailure)
     listFailure = cursor.fetchall()
     for i in range(0, len(listFailure)):
@@ -281,7 +284,7 @@ def main():
                     #print(msgReminder[failureIndex])
             telePrevTime = datetime.datetime.now()
         #print(inputData)
-        if int((datetime.datetime.now() - excelRecordPrevTime).total_seconds()) > 10:
+        if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 10:
             for i in range(0, 3):
                 sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
                 sendHarm = ((tuple(sendHarm)),)
@@ -294,11 +297,16 @@ def main():
             for row in sendLog:
                 sheet.append(row)
             #print("Heartbeat >> %s " % datetime.datetime.now())
-            excelRecordPrevTime = datetime.datetime.now()
-        if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 150:
+            #create backup
+            shutil.copy2(pathDatLog, pathDatBkup)
             #print("save excel data here")
-            excelSavePrevTime = datetime.datetime.now()
-            wb.save(pathDatLog)
+            try:
+                wb.save(pathDatLog)
+            except Exception as e:
+                print("1|%s" % e)
+                shutil.copy2(pathDatBkup, pathDatLog)
+            excelPrevTime = datetime.datetime.now()
+                
         #cycleTime = time.time() - start_time
         print("1|%s" % datetime.datetime.now())
         sys.stdout.flush()

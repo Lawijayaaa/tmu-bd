@@ -34,7 +34,7 @@ class App:
         self.thread1 = threading.Thread(target=self.stream_proc, args=(self.proc1, 0))
         self.thread2 = threading.Thread(target=self.stream_proc, args=(self.proc2, 1))
         self.thread3 = threading.Thread(target=self.update_tk, args=(1,))
-        self.thread4 = threading.Thread(target=self.watchdog, args=(10,))
+        self.thread4 = threading.Thread(target=self.watchdog, args=(20,))
         
         self.thread1.start()
         self.thread2.start()
