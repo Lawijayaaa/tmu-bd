@@ -98,7 +98,7 @@ def main():
                 'Extreme High']
     msgEvent = [None] * watchedData
     msgReminder = [None] * watchedData
-    telePrevTime = excelPrevTime = datetime.datetime.now()
+    telePrevTime = excelPrevTime  = excelSavePrevTime = datetime.datetime.now()
     cursor.execute(sqlLibrary.sqlFailure)
     listFailure = cursor.fetchall()
     for i in range(0, len(listFailure)):
@@ -284,7 +284,7 @@ def main():
                     #print(msgReminder[failureIndex])
             telePrevTime = datetime.datetime.now()
         #print(inputData)
-        if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 10:
+        if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 5:
             for i in range(0, 3):
                 sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
                 sendHarm = ((tuple(sendHarm)),)
@@ -297,6 +297,8 @@ def main():
             for row in sendLog:
                 sheet.append(row)
             #print("Heartbeat >> %s " % datetime.datetime.now())
+            excelPrevTime = datetime.datetime.now()
+        if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 180:
             #create backup
             shutil.copy2(pathDatLog, pathDatBkup)
             #print("save excel data here")
@@ -305,7 +307,7 @@ def main():
             except Exception as e:
                 print("1|%s" % e)
                 shutil.copy2(pathDatBkup, pathDatLog)
-            excelPrevTime = datetime.datetime.now()
+            excelSavePrevTime = datetime.datetime.now()
                 
         #cycleTime = time.time() - start_time
         print("1|%s" % datetime.datetime.now())
