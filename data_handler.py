@@ -2,7 +2,7 @@
 from pymodbus.client import ModbusSerialClient
 from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser
 from openpyxl import Workbook
-import mysql.connector, time, datetime, math, openpyxl, sys, shutil
+import mysql.connector, time, datetime, math, openpyxl, sys, shutil, os
 
 engineName = " Trafo X "
 progStat = True
@@ -304,6 +304,11 @@ def main():
             #print("save excel data here")
             try:
                 wb.save(pathDatLog)
+                time.sleep(0.5)
+                if os.path.getsize(pathDatLog) >= os.path.getsize(pathDatBkup):
+                    pass
+                else:
+                    raise Exception("backup larger than saved excel")
             except Exception as e:
                 print("1|%s" % e)
                 shutil.copy2(pathDatBkup, pathDatLog)
