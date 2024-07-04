@@ -106,6 +106,7 @@ def main():
             activeFailure[activeFailure.index(None)] = listFailure[i]
     #print(activeFailure)
     
+    print("1D|Start Loop")
     while progStat:
         start_time = time.time()
         cursor.execute(sqlLibrary.sqlTrafoSetting)
@@ -315,12 +316,12 @@ def main():
                 else:
                     raise Exception("backup larger than saved excel")
             except Exception as e:
-                print("1|%s" % e)
+                print("1D|%s" % e)
                 shutil.copy2(pathDatBkup, pathDatLog)
             excelSavePrevTime = datetime.datetime.now()
                 
         #cycleTime = time.time() - start_time
-        print("1|%s" % datetime.datetime.now())
+        print("1T|%s" % datetime.datetime.now())
         sys.stdout.flush()
         
 if __name__ == "__main__":

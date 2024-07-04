@@ -1,6 +1,6 @@
 from toolboxTMU import TimerEx
 from time import sleep
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO # type: ignore
 import Adafruit_ADS1x15
 import mysql.connector
 import json
@@ -44,6 +44,7 @@ def main():
     sqlUpdateDO = "UPDATE do_scan SET state = %s WHERE number = %s"
     sqlUpdateDI = "UPDATE di_scan SET state = %s WHERE number = %s"
     #print("Set up time >> %s seconds" % (time.time() - start_time))
+    print("2D|Start Loop")
     while True:
         start_time = time.time()
         oilLevelAlarm = 1 if adc.read_adc(1, gain = 2) > 25000 else 0
@@ -129,7 +130,7 @@ def main():
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
         sleep(0.5)
-        print("2|%s" % datetime.datetime.now())
+        print("2T|%s" % datetime.datetime.now())
         sys.stdout.flush()
     
 if __name__ == "__main__":

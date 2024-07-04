@@ -18,7 +18,8 @@ class App:
         logging.debug("Initializing App")
         self.progStat = [True, True, False]
         self.stopFlag = [False, False, False]
-        self.streams = ["init", "init", "init"]
+        self.streamsHB = ["init", "init", "init"]
+        self.streamsDebug = ["", ""]
         
         self.proc2 = self.start_proc("module_IO.py")
         time.sleep(1)
@@ -59,11 +60,18 @@ class App:
             with proc.stdout:
                 for line in iter(proc.stdout.readline, b''):
                     code = line[0:1]
-                    heartbeat = line[2:].decode("utf-8").strip()
+                    type = line[1:2]
+                    message = line[3:].decode("utf-8").strip()
                     if code == b'1':
-                        self.streams[0] = heartbeat
+                        if type == b'T':
+                            self.streamsHB[0] = message
+                        elif type == b'D':
+                            self.streamsDebug[0] = message
                     elif code == b'2':
-                        self.streams[1] = heartbeat
+                        if type == b'T':
+                            self.streamsHB[1] = message
+                        elif type == b'D':
+                            self.streamsDebug[1] = message
                     else:
                         logging.error(f"Unexpected code: {code}")
         except Exception as e:
@@ -72,9 +80,12 @@ class App:
     def update_tk(self, interval):
         try:
             while True:
-                self.main_screen.lastHB1Lbl['text'] = self.streams[0]
-                self.main_screen.lastHB2Lbl['text'] = self.streams[1]
-                self.main_screen.lastHB3Lbl['text'] = self.streams[2]
+                self.main_screen.lastHB1Lbl['text'] = self.streamsHB[0]
+                self.main_screen.lastHB2Lbl['text'] = self.streamsHB[1]
+                self.main_screen.lastHB3Lbl['text'] = self.streamsHB[2]
+
+                self.main_screen.debug1Lbl['text'] = self.streamsDebug[0]
+                self.main_screen.debug2Lbl['text'] = self.streamsDebug[1]
                 
                 self.main_screen.prog1Lbl['text'] = "Running" if self.progStat[0] else "Stop"
                 self.main_screen.stopBtn1['state'] = 'normal' if self.progStat[0] else 'disabled'
