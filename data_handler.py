@@ -1,6 +1,6 @@
 #from pymodbus.client import ModbusSerialClient
 from pymodbus.client import ModbusSerialClient
-from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser
+from toolboxTMU import parameter, sqlLibrary, initParameter, dataParser, harmonicParser, convertBinList
 from openpyxl import Workbook
 import mysql.connector, time, datetime, math, openpyxl, sys, shutil, os
 
@@ -274,6 +274,8 @@ def main():
         else:
             #print("okejek")
             pass
+
+        binList = convertBinList(inputIO, outputIO, currentTrip)
         
         if int((datetime.datetime.now() - telePrevTime).total_seconds()) > 3600:
             #print("sekadar mengingatkan")
@@ -291,7 +293,7 @@ def main():
                 sheetHarm = wb[sheetName[i]]
                 for row in sendHarm:
                     sheetHarm.append(row)
-            sendLog = [datetime.datetime.now().strftime("%H:%M:%S")] + inputData + [maxStat, 0, 0, 0, 0, 0]
+            sendLog = [datetime.datetime.now().strftime("%H:%M:%S")] + inputData + [maxStat] + binList
             sendLog = ((tuple(sendLog)),)
             sheet = wb["Raw_data"]
             for row in sendLog:

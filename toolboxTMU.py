@@ -275,6 +275,55 @@ def unsignedInt32Handler(dataset):
     tempData = int((hexData[1] + hexData[0]),16)
     return tempData
 
+def binaryToDecimal(binaryList):
+    decimal = 0
+    i = 0
+    for bit in binaryList:
+        decimal = decimal + bit * math.pow(2, i)
+        i += 1
+    return int(decimal)
+
+def convertBinList(stateDI, stateDO, tripStatus):
+    binList = [0, 0, 0, 0, 0]
+
+    binDI = [0]*6
+    for i in range(0, 6):
+        binDI[i] = stateDI[i][2]
+    binList[0] = binaryToDecimal(binDI)
+
+    binDO = [0]*5
+    for i in range(0, 5):
+        binDO[i] = stateDO[i][2]
+    binList[1] = binaryToDecimal(binDO)
+
+    binAlarm = [0]*len(tripStatus)
+    binTrip1 = [0]*len(tripStatus)
+    binTrip2 = [0]*len(tripStatus)
+    for i in range(0, len(tripStatus)):
+        if tripStatus[i] == 0:
+            binAlarm[i] = 0
+            binTrip1[i] = 0
+            binTrip2[i] = 0
+        elif tripStatus[i] == 1:
+            binAlarm[i] = 1
+            binTrip1[i] = 0
+            binTrip2[i] = 0
+        elif tripStatus[i] == 2:
+            binAlarm[i] = 0
+            binTrip1[i] = 1
+            binTrip2[i] = 0
+        elif tripStatus[i] == 3:
+            binAlarm[i] = 0
+            binTrip1[i] = 0
+            binTrip2[i] = 1
+        else:
+            pass
+    binList[2] = binaryToDecimal[binAlarm]
+    binList[3] = binaryToDecimal[binTrip1]
+    binList[4] = binaryToDecimal[binTrip2]
+
+    return binList
+
 class sqlLibrary():
     sqlTrafoSetting = "SELECT * FROM transformer_settings"
     sqlTrafoData = "SELECT * FROM transformer_data"
