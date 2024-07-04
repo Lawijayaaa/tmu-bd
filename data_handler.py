@@ -301,8 +301,11 @@ def main():
             #print("Heartbeat >> %s " % datetime.datetime.now())
             excelPrevTime = datetime.datetime.now()
         if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 180:
-            #create backup
-            shutil.copy2(pathDatLog, pathDatBkup)
+            if os.path.isfile(pathDatBkup) and os.path.getsize(pathDatBkup) >= os.path.getsize(pathDatLog):
+                    shutil.copy2(pathDatBkup, pathDatLog)
+            else:
+                #create backup
+                shutil.copy2(pathDatLog, pathDatBkup)
             #print("save excel data here")
             try:
                 wb.save(pathDatLog)

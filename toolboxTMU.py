@@ -318,9 +318,9 @@ def convertBinList(stateDI, stateDO, tripStatus):
             binTrip2[i] = 1
         else:
             pass
-    binList[2] = binaryToDecimal[binAlarm]
-    binList[3] = binaryToDecimal[binTrip1]
-    binList[4] = binaryToDecimal[binTrip2]
+    binList[2] = binaryToDecimal(binAlarm)
+    binList[3] = binaryToDecimal(binTrip1)
+    binList[4] = binaryToDecimal(binTrip2)
 
     return binList
 
