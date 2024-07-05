@@ -16,7 +16,7 @@ adc = Adafruit_ADS1x15.ADS1115(address = 0x48, busnum = 1)
 valveStat = 0
 gasEnabler = True
 openValveDuration = 10
-debugMsg = True
+debugMsg = False
 infoMsg = True
 
 db = mysql.connector.connect(
@@ -35,7 +35,7 @@ def updateJson(name, val):
     with open("module_IO.json", "w") as jsonFile: json.dump(data, jsonFile)
 
 def main():
-    if infoMsg == True: print("2D|1 Initialize program")
+    if infoMsg == True: print("2D|Initialize program")
     global valveStat
     timer = TimerEx(interval_sec = openValveDuration, function = gasRelease)
     with open("module_IO.json", "r") as jsonFile: data = json.load(jsonFile)
@@ -45,7 +45,7 @@ def main():
     sqlReadStat = "SELECT * FROM transformer_data"
     sqlUpdateDO = "UPDATE do_scan SET state = %s WHERE number = %s"
     sqlUpdateDI = "UPDATE di_scan SET state = %s WHERE number = %s"
-    if infoMsg == True: print("2D|12 Start loop")
+    if infoMsg == True: print("2D|Start loop")
     while True:
         start_time = time.time()
         if debugMsg == True: print("2D|1 Read ADC & Stat Oil Level")
@@ -140,7 +140,8 @@ def main():
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
         sleep(0.5)
-        if debugMsg == True: print("2D|Cycle time %s" % (round(10000 * (time.time() - start_time)))/10000)
+        cycleTime = (round(10000 * (time.time() - start_time)))/10000
+        if infoMsg == True: print("2D|Cycle time %s" % cycleTime)
         print("2T|%s" % datetime.datetime.now())
         sys.stdout.flush()
     

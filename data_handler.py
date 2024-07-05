@@ -6,7 +6,7 @@ import mysql.connector, time, datetime, math, openpyxl, sys, shutil, os
 
 engineName = " Trafo X "
 progStat = True
-debugMsg = True
+debugMsg = False
 infoMsg = True
 
 def main():
@@ -334,8 +334,9 @@ def main():
                 if infoMsg == True: print("1D|Save Failed, return to backup")
                 shutil.copy2(pathDatBkup, pathDatLog)
             excelSavePrevTime = datetime.datetime.now()
-                
-        if debugMsg == True: print("1D|Cycle time %s" % (round(10000 * (time.time() - start_time)))/10000)
+                        
+        cycleTime = (round(10000 * (time.time() - start_time)))/10000
+        if infoMsg == True: print("1D|Cycle time %s" % cycleTime)
         print("1T|%s" % datetime.datetime.now())
         sys.stdout.flush()
         
