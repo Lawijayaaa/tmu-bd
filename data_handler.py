@@ -309,6 +309,7 @@ def main():
                 shutil.copy2(pathDatLog, pathDatBkup)
             #print("save excel data here")
             try:
+                print("1D|Saving Excel")
                 wb.save(pathDatLog)
                 time.sleep(0.5)
                 if os.path.getsize(pathDatLog) >= os.path.getsize(pathDatBkup):
@@ -317,6 +318,7 @@ def main():
                     raise Exception("backup larger than saved excel")
             except Exception as e:
                 print("1D|%s" % e)
+                print("1D|Failed to save, return backup")
                 shutil.copy2(pathDatBkup, pathDatLog)
             excelSavePrevTime = datetime.datetime.now()
                 

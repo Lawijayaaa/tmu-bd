@@ -71,20 +71,20 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
         paramThreshold[3][i+6] = (trafoSetting[22] * trafoData[6])/100 #high trip Current Profile
         paramThreshold[2][i+40] = trafoSetting[17] #high alarm WTI Temp
         paramThreshold[3][i+40] = trafoSetting[18] #high trip WTI Temp
-        paramThreshold[2][i+36] = trafoSetting[27] #high alarm Busbar Temp
-        paramThreshold[3][i+36] = trafoSetting[28] #high trip Busbar Temp
-        paramThreshold[2][i + 11] = trafoSetting[31] #high alarm THD Voltage Alarm
-        paramThreshold[3][i + 11] = trafoSetting[32] #high trip THD Voltage Trip
-        paramThreshold[2][i + 14] = trafoSetting[29] #high alarm THD Current Alarm
-        paramThreshold[3][i + 14] = trafoSetting[30] #high trip THD Current Trip
+        paramThreshold[2][i+36] = trafoSetting[25] #high alarm Busbar Temp
+        paramThreshold[3][i+36] = trafoSetting[26] #high trip Busbar Temp
+        paramThreshold[2][i + 11] = trafoSetting[29] #high alarm THD Voltage Alarm
+        paramThreshold[3][i + 11] = trafoSetting[30] #high trip THD Voltage Trip
+        paramThreshold[2][i + 14] = trafoSetting[27] #high alarm THD Current Alarm
+        paramThreshold[3][i + 14] = trafoSetting[28] #high trip THD Current Trip
 
         paramTrip[i+3] = tripSetting[1] #trip setting Voltage
         paramTrip[i+53] = tripSetting[2] #trip setting gap Voltage
         paramTrip[i+6] = tripSetting[7] #trip setting Current Profile
-        paramTrip[i+40] = tripSetting[11] #trip setting WTI
+        paramTrip[i+40] = tripSetting[10] #trip setting WTI
         paramTrip[i+36] = tripSetting[5] #trip setting Busbar Temp
         paramTrip[i+11] = tripSetting[12] #trip setting THD Voltage
-        paramTrip[i+14] = tripSetting[13] #trip setting THD Current
+        paramTrip[i+14] = tripSetting[11] #trip setting THD Current
 
     paramThreshold[0][33] = trafoData[7] - ((trafoSetting[11] * trafoData[7])/100) #low trip Frequency
     paramThreshold[1][33] = trafoData[7] - ((trafoSetting[12] * trafoData[7])/100) #low alarm Frequency
@@ -94,25 +94,25 @@ def initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, data
     paramThreshold[3][39] = trafoSetting[16] #high trip Top Oil Temp
     paramThreshold[1][32] = trafoSetting[19] #low alarm PF
     paramThreshold[0][32] = trafoSetting[20] #low trip PF
-    paramThreshold[2][43] = trafoSetting[25] #high alarm Pressure Tank
-    paramThreshold[3][43] = trafoSetting[26] #high trip Pressure Tank
-    paramThreshold[2][10] = trafoSetting[33] #high alarm Neutral Current
-    paramThreshold[3][10] = trafoSetting[34] #high trip Neutral Current
+    paramThreshold[2][43] = trafoSetting[24] #high alarm Pressure Tank
+    paramThreshold[3][43] = trafoSetting[23] #high trip Pressure Tank
+    paramThreshold[2][10] = trafoSetting[31] #high alarm Neutral Current
+    paramThreshold[3][10] = trafoSetting[32] #high trip Neutral Current
     paramThreshold[1][44] = 2 #low alarm Oil Level
     paramThreshold[0][44] = 1 #low trip Oil Level
-    paramThreshold[2][51] = trafoSetting[35] #high alarm H2 ppm
-    paramThreshold[3][51] = trafoSetting[36] #high trip H2 ppm
-    paramThreshold[2][52] = trafoSetting[37] #high alarm Water Content ppm
-    paramThreshold[3][52] = trafoSetting[38] #high trip Water Content ppm
+    paramThreshold[2][51] = trafoSetting[33] #high alarm H2 ppm
+    paramThreshold[3][51] = trafoSetting[34] #high trip H2 ppm
+    paramThreshold[2][52] = trafoSetting[35] #high alarm Water Content ppm
+    paramThreshold[3][52] = trafoSetting[36] #high trip Water Content ppm
 
     paramTrip[33] = tripSetting[3] #trip setting Frequency
     paramTrip[39] = tripSetting[4] #trip setting Oil Temp
     paramTrip[32] = tripSetting[6] #trip setting PF
-    paramTrip[43] = tripSetting[9] #trip setting Tank Pressure
-    paramTrip[10] = tripSetting[14] #trip setting Neutral Current
-    paramTrip[44] = tripSetting[10] #trip setting Oil Level
-    paramTrip[51] = tripSetting[15] #trip setting H2 ppm
-    paramTrip[52] = tripSetting[16] #trip setting Water Content ppm
+    paramTrip[43] = tripSetting[8] #trip setting Tank Pressure
+    paramTrip[10] = tripSetting[13] #trip setting Neutral Current
+    paramTrip[44] = tripSetting[9] #trip setting Oil Level
+    paramTrip[51] = tripSetting[14] #trip setting H2 ppm
+    paramTrip[52] = tripSetting[15] #trip setting Water Content ppm
 
     for i in range(0, dataLen):            
         dataSet[i].name = arrayString[i]
