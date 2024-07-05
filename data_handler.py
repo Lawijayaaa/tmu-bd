@@ -6,8 +6,11 @@ import mysql.connector, time, datetime, math, openpyxl, sys, shutil, os
 
 engineName = " Trafo X "
 progStat = True
+debugMsg = False
+infoMsg = True
 
 def main():
+    if infoMsg == True: print("1D|Initialize Program") 
     dataLen = 56
     watchedData = 29
     CTratio = 1200
@@ -32,9 +35,10 @@ def main():
     sheetName = ["Harmonic_phR", "Harmonic_phS", "Harmonic_phT"]
     pathBkup = r'/home/pi/tmu-bd/assets/rawdata Test/backup/datalogger-backup-'
     pathDatBkup = pathBkup + ts + engineName + '.xlsx'
-    
+     
     try:
         wb = openpyxl.load_workbook(pathDatLog)
+        if debugMsg == True: print("1D|Open Existing Excel")
     except:
         #create new datalog
         workbook = Workbook()
@@ -69,6 +73,7 @@ def main():
             for row in rows:
                 sheetHarm.append(row)
         wb.save(pathDatLog)
+        if debugMsg == True: print("1D|Create New Excel")
     
     inputData = [0]*dataLen
     currentStat = [0]*watchedData
@@ -106,8 +111,9 @@ def main():
             activeFailure[activeFailure.index(None)] = listFailure[i]
     #print(activeFailure)
     
-    print("1D|Start Loop")
+    if infoMsg == True: print("1D|Start Loop")
     while progStat:
+        if debugMsg == True: print("1D|1 Fetch DB Data")
         start_time = time.time()
         cursor.execute(sqlLibrary.sqlTrafoSetting)
         trafoSetting = cursor.fetchall()[0]
@@ -128,17 +134,20 @@ def main():
         db.commit()
         CTratio = trafoData[26]
 
+        if debugMsg == True: print("1D|3 Import Active Failure")
         if len(activeFailure):
             for i in range(0, len(activeFailure)):
                 if activeFailure[i]:
                     activeParam[i] = activeFailure[i][4]
         
+        if debugMsg == True: print("1D|3 Update status Relay")
         for i in range(0, 5):
             if outputIO[i][2] == 1:
                 client.write_coil(i, True, slave = 3)
             elif outputIO[i][2] == 0:
                 client.write_coil(i, False, slave = 3)
                 
+        if debugMsg == True: print("1D|4 Read Modbus Slave")
         getTemp = client.read_holding_registers(4, 3, slave = 1)
         getElect1 = client.read_holding_registers(0, 29, slave = 2)
         getElect2 = client.read_holding_registers(46, 5, slave = 2)
@@ -157,14 +166,7 @@ def main():
             oilStat = 2
         elif oilLevelAlarm == 0 and oilLevelTrip == 0:
             oilStat = 3
-        inputHarmonicV = harmonicParser(getHarmV)
-        inputHarmonicI = harmonicParser(getHarmI)
-        cursor.execute(sqlLibrary.sqlUpdateVHarm1, inputHarmonicV[0])
-        cursor.execute(sqlLibrary.sqlUpdateVHarm2, inputHarmonicV[1])
-        cursor.execute(sqlLibrary.sqlUpdateVHarm3, inputHarmonicV[2])
-        cursor.execute(sqlLibrary.sqlUpdateIHarm1, inputHarmonicI[0])
-        cursor.execute(sqlLibrary.sqlUpdateIHarm2, inputHarmonicI[1])
-        cursor.execute(sqlLibrary.sqlUpdateIHarm3, inputHarmonicI[2])
+        if debugMsg == True: print("1D|5 Parse Data")
         inputData = dataParser(getTemp, getElect1, getElect2, getElect3, getH2, getMoist, dataLen, CTratio, PTratio)
         inputData[39] = inputIO[6][2] #Oil Temp
         inputData[43] = inputIO[7][2] #Pressure
@@ -174,7 +176,7 @@ def main():
         #inputData[32] = 1
         #inputData[53] = inputData[55] = 0
         #inputData[14] = 5
-
+        if debugMsg == True: print("1D|6 Calculate WTI")
         for i in range(0, 3): loadFactor[i] = (inputData[i + 6])/trafoData[6]
         for i in range(0, 3):
             currentLoadDefiner[i] = inputData[i + 6]
@@ -204,7 +206,17 @@ def main():
             except:
                 pass
             inputData[i + 40] = (round((inputData[39] + (deltaH1[i] - deltaH2[i])) * 100))/100
-
+        
+        if debugMsg == True: print("1D|7 Parse Harm, Update DB")
+        inputHarmonicV = harmonicParser(getHarmV)
+        inputHarmonicI = harmonicParser(getHarmI)
+        cursor.execute(sqlLibrary.sqlUpdateVHarm1, inputHarmonicV[0])
+        cursor.execute(sqlLibrary.sqlUpdateVHarm2, inputHarmonicV[1])
+        cursor.execute(sqlLibrary.sqlUpdateVHarm3, inputHarmonicV[2])
+        cursor.execute(sqlLibrary.sqlUpdateIHarm1, inputHarmonicI[0])
+        cursor.execute(sqlLibrary.sqlUpdateIHarm2, inputHarmonicI[1])
+        cursor.execute(sqlLibrary.sqlUpdateIHarm3, inputHarmonicI[2])
+        if debugMsg == True: print("1D|8 Calculate KRated")
         kRatedlist = inputHarmonicI
         for i in range(0, 32):
             hSquared[i] = math.pow(((2*(i+1))-1), 2)
@@ -217,12 +229,12 @@ def main():
                 deRating[i] = 100
             inputData[i*2 + 45] = kRated[i]
             inputData[i*2 + 46] = (round(deRating[i] * 100))/100
-
+        if debugMsg == True: print("1D|9 Input all data DB")
         dataResult = initParameter(dataSet, inputData, trafoSetting, trafoData, tripSetting, dataLen) 
         sendData = [datetime.datetime.now()] + inputData
         cursor.execute(sqlLibrary.sqlInsertData, sendData)
         db.commit()
-        
+        if debugMsg == True: print("1D|10 Check Failures Stat")
         maxStat = 0
         i =  0
         for data in dataResult:
@@ -257,7 +269,7 @@ def main():
                         activeParam[activeParam.index(data.name)] = None
                         msgEvent[i] = None
                 i = i + 1
-        
+        if debugMsg == True: print("1D|11 Check state changes")
         if prevStat != currentStat or prevTrip != currentTrip:
             #print("Send Telegram Lhooo")
             tele = list(filter(None, msgEvent))
@@ -271,14 +283,11 @@ def main():
             cursor.execute(sqlLibrary.sqlUpdateTripStatus, currentTrip)
             cursor.execute(sqlLibrary.sqlUpdateTrafoStat, (maxStat,))
             db.commit()
-            
         else:
-            #print("okejek")
             pass
-
         binList = convertBinList(inputIO, outputIO, currentTrip)
-        
         if int((datetime.datetime.now() - telePrevTime).total_seconds()) > 3600:
+            if debugMsg == True: print("1D|12 Routine remind Tele")
             #print("sekadar mengingatkan")
             for i in range(0, len(activeFailure)):
                 if activeFailure[i]:
@@ -288,6 +297,7 @@ def main():
             telePrevTime = datetime.datetime.now()
         #print(inputData)
         if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 5:
+            if debugMsg == True: print("1D|12 Routine Add data to work stage excel")
             for i in range(0, 3):
                 sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
                 sendHarm = ((tuple(sendHarm)),)
@@ -299,30 +309,33 @@ def main():
             sheet = wb["Raw_data"]
             for row in sendLog:
                 sheet.append(row)
-            #print("Heartbeat >> %s " % datetime.datetime.now())
             excelPrevTime = datetime.datetime.now()
         if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 180:
+            if infoMsg == True: print("1D|Check Current Excel Size")
             if os.path.isfile(pathDatBkup) and os.path.getsize(pathDatBkup) >= os.path.getsize(pathDatLog):
-                    shutil.copy2(pathDatBkup, pathDatLog)
+                if infoMsg == True: print("1D|Excel Smaller than backup, replacing")
+                shutil.copy2(pathDatBkup, pathDatLog)
             else:
                 #create backup
+                if infoMsg == True: print("1D|create backup")
                 shutil.copy2(pathDatLog, pathDatBkup)
             #print("save excel data here")
             try:
-                print("1D|Saving Excel")
+                if infoMsg == True: print("1D|Try to save Excel from work stage")
                 wb.save(pathDatLog)
                 time.sleep(0.5)
                 if os.path.getsize(pathDatLog) >= os.path.getsize(pathDatBkup):
-                    pass
+                    if infoMsg == True: print("1D|Save Success")
                 else:
                     raise Exception("backup larger than saved excel")
             except Exception as e:
-                print("1D|%s" % e)
-                print("1D|Failed to save, return backup")
+                if infoMsg == True: print("1D|%s" % e)
+                if infoMsg == True: print("1D|Save Failed, return to backup")
                 shutil.copy2(pathDatBkup, pathDatLog)
             excelSavePrevTime = datetime.datetime.now()
                 
-        #cycleTime = time.time() - start_time
+        cycleTime = time.time() - start_time
+        if infoMsg == True: print("1D|Cycle time %s" % cycleTime)
         print("1T|%s" % datetime.datetime.now())
         sys.stdout.flush()
         
