@@ -122,8 +122,8 @@ class App:
                 currentLabel2 = self.main_screen.lastHB2Lbl['text']
                 if lastLabel1 == currentLabel1 or lastLabel2 == currentLabel2 or anchorDays != nowTime.day:
                     if self.progStat[0] and self.progStat[1]:
-                        self.restart()
                         logging.info(f"Restarting machine: {nowTime}")
+                        self.restart()
                     else:
                         pass
                 else:

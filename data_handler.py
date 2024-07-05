@@ -336,7 +336,7 @@ def main():
             excelSavePrevTime = datetime.datetime.now()
                         
         cycleTime = (round(10000 * (time.time() - start_time)))/10000
-        if infoMsg == True: print("1D|Cycle time %s" % cycleTime)
+        if debugMsg == True: print("1D|Cycle time %s" % cycleTime)
         print("1T|%s" % datetime.datetime.now())
         sys.stdout.flush()
         

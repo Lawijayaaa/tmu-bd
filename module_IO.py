@@ -141,7 +141,7 @@ def main():
         #print(valveStat)
         sleep(0.5)
         cycleTime = (round(10000 * (time.time() - start_time)))/10000
-        if infoMsg == True: print("2D|Cycle time %s" % cycleTime)
+        if debugMsg == True: print("2D|Cycle time %s" % cycleTime)
         print("2T|%s" % datetime.datetime.now())
         sys.stdout.flush()
     
