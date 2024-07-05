@@ -331,8 +331,9 @@ def main():
                     raise Exception("backup larger than saved excel")
             except Exception as e:
                 if infoMsg == True: print("1D|%s" % e)
-                if infoMsg == True: print("1D|Save Failed, return to backup")
+                if infoMsg == True: print("1D|Save Failed, return to backup, restart system")
                 shutil.copy2(pathDatBkup, pathDatLog)
+                if infoMsg == True: print("1D|Restart")
             excelSavePrevTime = datetime.datetime.now()
                         
         cycleTime = (round(10000 * (time.time() - start_time)))/10000

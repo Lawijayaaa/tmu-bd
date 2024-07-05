@@ -55,7 +55,9 @@ class App:
     def start_proc(self, script):
         logging.debug(f"Starting process: {script}")
         try:
-            return subprocess.Popen(["python3", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = subprocess.Popen(["python3", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logging.debug(f"Process {script} started with PID: {proc.pid}")
+            return proc
         except Exception as e:
             logging.error(f"Failed to start process {script}: {e}")
             return None
@@ -120,6 +122,9 @@ class App:
                 time.sleep(interval)
                 currentLabel1 = self.main_screen.lastHB1Lbl['text']
                 currentLabel2 = self.main_screen.lastHB2Lbl['text']
+                if self.streamsDebug[0] == "Restart" or self.streamsDebug[1] == "Restart":
+                    logging.info(f"Restarting from process: {nowTime}")
+                    self.restart()
                 if lastLabel1 == currentLabel1 or lastLabel2 == currentLabel2 or anchorDays != nowTime.day:
                     if self.progStat[0] and self.progStat[1]:
                         logging.info(f"Restarting machine: {nowTime}")
