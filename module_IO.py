@@ -16,6 +16,8 @@ adc = Adafruit_ADS1x15.ADS1115(address = 0x48, busnum = 1)
 valveStat = 0
 gasEnabler = True
 openValveDuration = 10
+debugMsg = True
+infoMsg = True
 
 db = mysql.connector.connect(
     host = "localhost",
@@ -33,7 +35,7 @@ def updateJson(name, val):
     with open("module_IO.json", "w") as jsonFile: json.dump(data, jsonFile)
 
 def main():
-    #start_time = time.time()
+    if infoMsg == True: print("2D|1 Initialize program")
     global valveStat
     timer = TimerEx(interval_sec = openValveDuration, function = gasRelease)
     with open("module_IO.json", "r") as jsonFile: data = json.load(jsonFile)
@@ -43,10 +45,10 @@ def main():
     sqlReadStat = "SELECT * FROM transformer_data"
     sqlUpdateDO = "UPDATE do_scan SET state = %s WHERE number = %s"
     sqlUpdateDI = "UPDATE di_scan SET state = %s WHERE number = %s"
-    #print("Set up time >> %s seconds" % (time.time() - start_time))
-    print("2D|Start Loop")
+    if infoMsg == True: print("2D|12 Start loop")
     while True:
         start_time = time.time()
+        if debugMsg == True: print("2D|1 Read ADC & Stat Oil Level")
         oilLevelAlarm = 1 if adc.read_adc(1, gain = 2) > 25000 else 0
         oilLevelTrip = 1 if adc.read_adc(0, gain = 2) > 25000 else 0
         if (oilLevelAlarm and oilLevelTrip) or oilLevelTrip:
@@ -55,6 +57,8 @@ def main():
             oilStat = 2
         elif oilLevelAlarm == 0 and oilLevelTrip == 0:
             oilStat = 3
+            
+        if debugMsg == True: print("2D|2 Gas Fault logic")
         if gasEnabler:
             with open("module_IO.json", "r") as jsonFile: data = json.load(jsonFile)
             resetValve = data["resetValve"]
@@ -73,6 +77,8 @@ def main():
                     updateJson("resetValve", False)
                 elif valveStat == 0:
                     updateJson("prevStatOil", oilStat)
+        
+        if debugMsg == True: print("2D|3 Input definition, Update DB")
         pbStat = GPIO.input(13)
         analogIn1 = 0 if adc.read_adc(3, gain = 2) < 0 else adc.read_adc(3, gain = 2)
         analogIn2 = 0 if adc.read_adc(2, gain = 2) < 0 else adc.read_adc(2, gain = 2)
@@ -87,6 +93,8 @@ def main():
         cursor.execute(sqlReadStat)
         trafoStat = cursor.fetchall()[0][28]
         db.commit()
+        
+        if debugMsg == True: print("2D|4 Update DO based on Trafo stat & Gas Fault stat")
         if trafoStat == 1:
             cursor.execute(sqlUpdateDO, [1, 0])
             cursor.execute(sqlUpdateDO, [0, 1])
@@ -104,6 +112,8 @@ def main():
             cursor.execute(sqlUpdateDO, [0, 1])
             cursor.execute(sqlUpdateDO, [0, 2])
         cursor.execute(sqlUpdateDO, [valveStat, 4])
+        
+        if debugMsg == True: print("2D|5 PB Logic")
         if trafoStat != prevStatBuzz and trafoStat != 0:
             if resetBuzz:
                 #print("buzzer off")
@@ -130,6 +140,7 @@ def main():
         updateJson("resetBuzz", resetBuzz)
         #print(valveStat)
         sleep(0.5)
+        if debugMsg == True: print("2D|Cycle time %s" % (round(10000 * (time.time() - start_time)))/10000)
         print("2T|%s" % datetime.datetime.now())
         sys.stdout.flush()
     

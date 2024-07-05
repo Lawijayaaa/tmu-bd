@@ -6,7 +6,7 @@ import mysql.connector, time, datetime, math, openpyxl, sys, shutil, os
 
 engineName = " Trafo X "
 progStat = True
-debugMsg = False
+debugMsg = True
 infoMsg = True
 
 def main():
@@ -297,7 +297,7 @@ def main():
             telePrevTime = datetime.datetime.now()
         #print(inputData)
         if int((datetime.datetime.now() - excelPrevTime).total_seconds()) > 5:
-            if debugMsg == True: print("1D|12 Routine Add data to work stage excel")
+            if debugMsg == True: print("1D|12A Routine Add data to work stage excel")
             for i in range(0, 3):
                 sendHarm = [datetime.datetime.now().strftime("%H:%M:%S")] + inputHarmonicV[i] + inputHarmonicI[i]
                 sendHarm = ((tuple(sendHarm)),)
@@ -311,13 +311,14 @@ def main():
                 sheet.append(row)
             excelPrevTime = datetime.datetime.now()
         if int((datetime.datetime.now() - excelSavePrevTime).total_seconds()) > 180:
+            if debugMsg == True: print("1D|12B Routine Save Excel")
             if infoMsg == True: print("1D|Check Current Excel Size")
             if os.path.isfile(pathDatBkup) and os.path.getsize(pathDatBkup) >= os.path.getsize(pathDatLog):
                 if infoMsg == True: print("1D|Excel Smaller than backup, replacing")
                 shutil.copy2(pathDatBkup, pathDatLog)
             else:
                 #create backup
-                if infoMsg == True: print("1D|create backup")
+                if infoMsg == True: print("1D|Backup Excel")
                 shutil.copy2(pathDatLog, pathDatBkup)
             #print("save excel data here")
             try:
@@ -334,8 +335,7 @@ def main():
                 shutil.copy2(pathDatBkup, pathDatLog)
             excelSavePrevTime = datetime.datetime.now()
                 
-        cycleTime = time.time() - start_time
-        if infoMsg == True: print("1D|Cycle time %s" % cycleTime)
+        if debugMsg == True: print("1D|Cycle time %s" % (round(10000 * (time.time() - start_time)))/10000)
         print("1T|%s" % datetime.datetime.now())
         sys.stdout.flush()
         
