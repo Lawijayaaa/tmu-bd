@@ -30,15 +30,40 @@ def gasRelease():
     valveStat = 0
 
 def updateJson(name, val):
-    with open("module_IO.json", "r") as jsonFile: data = json.load(jsonFile)
-    data[name] = val
-    with open("module_IO.json", "w") as jsonFile: json.dump(data, jsonFile)
+    try:
+        with open("module_IO.json", "r") as jsonFile:
+            data = json.load(jsonFile)
+        data[name] = val
+        with open("module_IO.json", "w") as jsonFile:
+            json.dump(data, jsonFile)
+    except json.JSONDecodeError:
+        if infoMsg == True: print("2D|JSON File corrupt, rewrite")
+        data = {
+            "resetBuzz" : False,
+            "prevStatBuzz" : 0,
+            "resetValve" : False,
+            "prevStatOil" : 0
+            }
+        data[name] = val
+        with open("module_IO.json", "w") as jsonFile:
+            json.dump(data, jsonFile)        
 
 def main():
     if infoMsg == True: print("2D|Initialize program")
     global valveStat
     timer = TimerEx(interval_sec = openValveDuration, function = gasRelease)
-    with open("module_IO.json", "r") as jsonFile: data = json.load(jsonFile)
+    try:
+        with open("module_IO.json", "r") as jsonFile:
+            data = json.load(jsonFile)
+    except json.JSONDecodeError:
+        if infoMsg == True: print("2D|JSON File corrupt at main, use default value")
+        data = {
+            "resetBuzz" : False,
+            "prevStatBuzz" : 0,
+            "resetValve" : False,
+            "prevStatOil" : 0
+            }
+    
     resetBuzz = data["resetBuzz"]
     prevStatBuzz = data["prevStatBuzz"]
     cursor = db.cursor()
@@ -60,7 +85,17 @@ def main():
             
         if debugMsg == True: print("2D|2 Gas Fault logic")
         if gasEnabler:
-            with open("module_IO.json", "r") as jsonFile: data = json.load(jsonFile)
+            try:
+                with open("module_IO.json", "r") as jsonFile:
+                    data = json.load(jsonFile)
+            except json.JSONDecodeError:
+                if infoMsg == True: print("2D|JSON File corrupt at gas Enabler, use default value")
+                data = {
+                    "resetBuzz" : False,
+                    "prevStatBuzz" : 0,
+                    "resetValve" : False,
+                    "prevStatOil" : 0
+                    }
             resetValve = data["resetValve"]
             prevStatOil = data["prevStatOil"]
             if timer.is_alive() == False and resetValve == False:
