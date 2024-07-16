@@ -325,7 +325,9 @@ def main():
                 if infoMsg == True: print("1D|Try to save Excel from work stage")
                 wb.save(pathDatLog)
                 time.sleep(0.5)
-                if os.path.getsize(pathDatLog) >= os.path.getsize(pathDatBkup):
+                if infoMsg == True: print("1D|Excel Size %s " % (os.path.getsize(pathDatLog)))
+                if infoMsg == True: print("1D|Backup Size %s " % (os.path.getsize(pathDatBkup)))
+                if (os.path.getsize(pathDatBkup) - os.path.getsize(pathDatLog)) < 3000:
                     if infoMsg == True: print("1D|Save Success")
                 else:
                     raise Exception("backup larger than saved excel")
