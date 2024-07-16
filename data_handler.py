@@ -14,7 +14,7 @@ def main():
     dataLen = 56
     watchedData = 29
     CTratio = 1200
-    PTratio = 2
+    PTratio = 1
     eddyLosesGroup = 0.02
     designedKrated = 1
     loadCoef = 5
@@ -38,7 +38,7 @@ def main():
      
     try:
         wb = openpyxl.load_workbook(pathDatLog)
-        if debugMsg == True: print("1D|Open Existing Excel")
+        if infoMsg == True: print("1D|Open Existing Excel")
     except:
         #create new datalog
         workbook = Workbook()
