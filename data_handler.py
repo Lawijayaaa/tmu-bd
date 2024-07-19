@@ -30,10 +30,10 @@ def main():
 
     #init logger rawdata
     ts = time.strftime("%Y%m%d")
-    pathStr = r'/home/pi/tmu-bd/assets/rawdata Test/datalogger-'
+    pathStr = r'/home/pi/tmu-v2-smart/assets/rawdata Test/datalogger-'
     pathDatLog = pathStr + ts + engineName + '.xlsx'
     sheetName = ["Harmonic_phR", "Harmonic_phS", "Harmonic_phT"]
-    pathBkup = r'/home/pi/tmu-bd/assets/rawdata Test/backup/datalogger-backup-'
+    pathBkup = r'/home/pi/tmu-v2-smart/assets/rawdata Test/backup/datalogger-backup-'
     pathDatBkup = pathBkup + ts + engineName + '.xlsx'
      
     try:
